@@ -11,6 +11,7 @@ N = 0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141
 # end::source10[]
 class S256Point(Point):
     """
+    공개키 클래스
     secp256k1 에서의 점 객체 정의
     비트코인에서 사용하는 점 객체 정의
     1. y^2 = x^3 + bx + 7 에서 a = 0, b = 7
@@ -31,11 +32,23 @@ class S256Point(Point):
             super().__init__(x=x, y=y, a=a, b=b)
 
     def __rmul__(self, coefficient):
+        """
+        출력 재정의
+        :param coefficient: 계수
+        :return:
+        """
         coef = coefficient % N # nG 는 0 이므로 n 으로 나눈 나머지를 구하는 나머지 연산을 할 수 있음.
         # 즉 n 번마다 다시 0(무한원점) 으로 되돌아옴
         return super().__rmul__(coef)
 
     def verify(self, z, sign):
+        """
+        서명 검증 기능 구현
+        :param z: 메시지
+        :param sign: 서명에는 r, s 값이 있음
+        :return:
+            Boolean: 검증 성공 / 실패
+        """
         G = S256Point(
             0x79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798,
             0x483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8)
