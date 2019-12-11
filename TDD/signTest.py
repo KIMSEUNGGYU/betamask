@@ -2,7 +2,7 @@ from unittest import TestCase
 import os
 import sys
 sys.path.append(os.path.abspath("/Users/SG/PycharmProjects/bitcoin/"))
-from lib.helper import run
+from lib.helper import run, hash256
 from s256Point import S256Point
 from signature import Signature
 
@@ -13,20 +13,21 @@ G = S256Point(
 
 class SignTest(TestCase):
     def ex_1(self):
+        print("********** [서명 검증 실습 1] **********")
         z = 0xbc62d4b80d9e36da29c16c5d4d9f11731f36052c72401a76c23c0fb5a9b74423
         r = 0x37206a0610995c58074999cb9767b87af4c4978db68c06e8e6e81d282047a7c6
         s = 0x8ca63759c1157ebeaec0d03cecca119fc9a75bf8e6d0fa65c841c8e2738cdaec
         public_x = 0x04519fac3d910ca7e7138f7013706f619fa8f033e6ec6e09370ea38cee6a7574 # 공개키
         public_y = 0x82b51eab8c27c66e26c858a079bcdf4f1ada34cec420cafc7eac1a42216fb6c4 # 공개키
 
-        point = S256Point(public_x, public_y)
+        public_point = S256Point(public_x, public_y) # 공개키 생성
         s_inv = pow(s, N-2, N) # 페르마의 소정리 , "/s" 코드
         u = z * s_inv % N
         v = r * s_inv % N
-        print((u*G + v*point).x.num == r)
+        print("서명 검증 결과: ", (u * G + v * public_point).x.num == r)
 
     def ex_2(self):
-
+        print("********** [서명 검증 실습 2] **********")
         # 공개키
         public_x = 0x887387e452b8eacc4acfde10d9aaf7f6d9a0f975aabb10d006e4da568744d06c
         public_y = 0x61de6d95231cd89026e286df3b6ae4a894a3378e393e93a0f45b666329a0ae34
@@ -43,7 +44,7 @@ class SignTest(TestCase):
         s_inverse = pow(s, N-2, N)
         u = z * s_inverse
         v = r * s_inverse
-        print((u*G + v*public_point).x.num == r)
+        print("서명 검증 결과: ",(u*G + v*public_point).x.num == r)
 
         ## 2
         # 메시지
@@ -56,7 +57,20 @@ class SignTest(TestCase):
         s_inverse = pow(s, N - 2, N)
         u = z * s_inverse
         v = r * s_inverse
-        print((u * G + v * public_point).x.num == r)
+        print("서명 검증 결과: ", (u * G + v * public_point).x.num == r)
+
+    def ex_3(self):
+        print("********** [비밀키 e 로 메시지 z 의 서명 구하기] **********")
+        e = 12345
+        z = int.from_bytes(hash256(b'Programming Bitcoin!'), 'big') # from_byte 는 byte 를 정수로 돌려줌
+        k = 1234567890 # 랜덤 수
+        r = (k * G).x.num
+        k_inverse = pow(2, N-2, N)
+        s = (z + r*e) * k_inverse % N
+        print("공개키: ", e * G)
+        print("메시지 서명 hex(z): ", hex(z))
+        print("타겟 hex(r): ", hex(r))
+        print("s 의 값 hex(s): ", hex(s))
 
     def test_order(self):
         point = N * G
@@ -99,9 +113,10 @@ class SignTest(TestCase):
         self.assertTrue(point.verify(z, Signature(r, s)))
 
 
-# run(SignTest("ex_1"))
-# run(SignTest("ex_2"))
+# run(SignTest("ex_1")) # 서명 검증
+# run(SignTest("ex_2")) # 서명 검증
+# run(SignTest("ex_3")) # 비밀키 e 로 메시지 z 의 서명 구하기
 # run(SignTest("test_order"))
 # run(SignTest("test_pubpoint"))
-run(SignTest("test_verify"))
+# run(SignTest("test_verify"))
 
