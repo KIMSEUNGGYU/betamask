@@ -1,3 +1,5 @@
+from src.fieldElement import FieldElement
+
 class Point:
     def __init__(self, x, y, a, b):
         self.x = x
@@ -20,6 +22,8 @@ class Point:
     def __repr__(self):
         if self.x is None:
             return f'Point(항등원[무한원점])'
+        elif isinstance(self.x, FieldElement):
+            return f'Point({self.x.num}, {self.y.num})_{self.a.num}_{self.b.num} fieldElement({self.x.prime})'
         else:
             return f'Point({self.x}, {self.y})_{self.a}_{self.b}'
 
