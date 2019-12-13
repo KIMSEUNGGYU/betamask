@@ -50,7 +50,8 @@ class Point:
 
         # 점 덧셈 성질 4. 같은 두 점(P1 == P2) 상에서의 덧셈
         # if self == other: # 이렇게 안하는 이유가 점 덧셈 5 의 성질 때문에
-        if self.x == other.x and self.y == other.y:
+        # if self.x == other.x and self.y == other.y:
+        if self == other:
             s = (3 * pow(self.x, 2) + self.a) / (2 * self.y)
             x3 = pow(s, 2) - (2 * self.x)
             y3 = s * (self.x - x3) - self.y
@@ -60,3 +61,20 @@ class Point:
         # 두 점이 같고 y 좌표가 0이면 무한원점을 반환
         if self == other and self.y == 0 * self.x:
             return self.__class__(None, None, self.a, self.b)
+
+    def __rmul__(self, coefficient):
+        # 타원곡선 위에서 점에서 오른쪽 곱의 값이 객체인 경우 - ECC 를 구현하기 위해서 point, 유한체 에서 필요
+
+        coef = coefficient # current 는 시작하는 점으로 초기화
+        # current 값은 초기에는 자기 자신이고,
+        # 이후 bit로 풀었을때 1인 경우 1 * current, 2 * current, 4 * current, 8 * current ... 로 표현함
+        current = self
+        result = self.__class__(None, None, self.a, self.b) # 항등원 인 0 으로 초기화
+
+        while coef:
+            if coef & 1:
+                result += current # bit 의 위치가 1이면 1의 자리에 값을 더함
+            current += current # 2진수는 하나의 비트씩 이전 값의 2배로 증가함
+            coef >>= 1 # 수행이 끝났으므로 최하위 비트 탈락시키기
+
+        return result
