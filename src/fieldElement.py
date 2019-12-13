@@ -50,3 +50,7 @@ class FieldElement:
         num = (self.num * pow(other.num, self.prime - 2, self.prime)) % self.prime
         return self.__class__(num, self.prime)
 
+    def __rmul__(self, coefficient):
+        # 유한체 상에서 오른쪽 곱의 값이 객체인 경우 - ECC 를 구현하기 위해서 point, 유한체 에서 필요
+        num = (self.num * coefficient) % self.prime
+        return self.__class__(num=num, prime=self.prime)
