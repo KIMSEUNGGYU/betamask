@@ -51,6 +51,57 @@ class S256Test(TestCase):
         s = 0xc7207fee197d27c618aea621406f6bf5ef6fca38681d82b2f06fddbdce6feab6
         self.assertTrue(point.verify(z, Signature(r, s)))
 
+    def test_sec(self):
+        print("********** [공개키 SEC 직렬화 테스트] **********")
+        G = S256Point(GX, GY)
+        coefficient = 999**3
+        uncompressed = '049d5ca49670cbe4c3bfa84c96a8c87df086c6ea6a24ba6b809c9de234496808d56fa15cc7f3d38cda98dee2419f415b7513dde1301f8643cd9245aea7f3f911f9'
+        compressed = '039d5ca49670cbe4c3bfa84c96a8c87df086c6ea6a24ba6b809c9de234496808d5'
+        point = coefficient * G
+        self.assertEqual(point.sec(compressed=False), bytes.fromhex(uncompressed))
+        self.assertEqual(point.sec(compressed=True), bytes.fromhex(compressed))
+        coefficient = 123
+        uncompressed = '04a598a8030da6d86c6bc7f2f5144ea549d28211ea58faa70ebf4c1e665c1fe9b5204b5d6f84822c307e4b4a7140737aec23fc63b65b35f86a10026dbd2d864e6b'
+        compressed = '03a598a8030da6d86c6bc7f2f5144ea549d28211ea58faa70ebf4c1e665c1fe9b5'
+        point = coefficient * G
+        self.assertEqual(point.sec(compressed=False), bytes.fromhex(uncompressed))
+        self.assertEqual(point.sec(compressed=True), bytes.fromhex(compressed))
+        coefficient = 42424242
+        uncompressed = '04aee2e7d843f7430097859e2bc603abcc3274ff8169c1a469fee0f20614066f8e21ec53f40efac47ac1c5211b2123527e0e9b57ede790c4da1e72c91fb7da54a3'
+        compressed = '03aee2e7d843f7430097859e2bc603abcc3274ff8169c1a469fee0f20614066f8e'
+        point = coefficient * G
+        self.assertEqual(point.sec(compressed=False), bytes.fromhex(uncompressed))
+        self.assertEqual(point.sec(compressed=True), bytes.fromhex(compressed))
+
+    def test_address(self):
+        print("********** [비트코인 주소 테스트] **********")
+        G = S256Point(GX, GY)
+        secret = 888**3
+        mainnet_address = '148dY81A9BmdpMhvYEVznrM45kWN32vSCN'
+        testnet_address = 'mieaqB68xDCtbUBYFoUNcmZNwk74xcBfTP'
+        point = secret * G
+        self.assertEqual(
+            point.address(compressed=True, testnet=False), mainnet_address)
+        self.assertEqual(
+            point.address(compressed=True, testnet=True), testnet_address)
+        secret = 321
+        mainnet_address = '1S6g2xBJSED7Qr9CYZib5f4PYVhHZiVfj'
+        testnet_address = 'mfx3y63A7TfTtXKkv7Y6QzsPFY6QCBCXiP'
+        point = secret * G
+        self.assertEqual(
+            point.address(compressed=False, testnet=False), mainnet_address)
+        self.assertEqual(
+            point.address(compressed=False, testnet=True), testnet_address)
+        secret = 4242424242
+        mainnet_address = '1226JSptcStqn4Yq9aAmNXdwdc2ixuH9nb'
+        testnet_address = 'mgY3bVusRUL6ZB2Ss999CSrGVbdRwVpM8s'
+        point = secret * G
+        self.assertEqual(
+            point.address(compressed=False, testnet=False), mainnet_address)
+        self.assertEqual(
+            point.address(compressed=False, testnet=True), testnet_address)
+
+
     def exercise1(self):
         print("********** [SECP256k1 곡선의 생성점 G 가 y^2 = x^3 + 7 위에 있는지 확인] **********")
         gx = 0x79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798 # 생성점 x 좌표
@@ -190,10 +241,11 @@ class S256Test(TestCase):
 
 
 ## 책 예제 테스트 코드 구현
-# run(S256Test("test_order"))             # 유한순환군의 N 인지 확인하는 기능 구현
-# run(S256Test("test_pubpoint"))          # 비밀키와 공개키 일치하는지 확인
-# run(S256Test("test_verify"))            # 전자 서명 검증 기능 테스트
-
+run(S256Test("test_order"))             # 유한순환군의 N 인지 확인하는 기능 구현
+run(S256Test("test_pubpoint"))          # 비밀키와 공개키 일치하는지 확인
+run(S256Test("test_verify"))            # 전자 서명 검증 기능 테스트
+run(S256Test("test_sec"))                 # 공개키 직렬화 sec 테스트
+run(S256Test("test_address"))           # 비트코인 주소 테스트
 
 # ## 비트코인에서 제안한 타원곡선 암호 및 전자서명 생성 및 검증 테스트
 # run(S256Test("exercise1"))            # 생성점 G 가 y^2 = x^3 + 7 위에 있는지 확인
