@@ -99,3 +99,46 @@ def int_to_little_endian(n, length):
         bytes: 정수 n 의 리틀엔디언 방식 바이트값
     """
     return n.to_bytes(length, 'little')
+
+
+# ## 가변 정수 파싱 및 직렬화 기능 구현
+def read_variant(stream):
+    """
+    스트림으로부터 필요한 바이트 개수만큼 읽고 이를 정수로 반환함
+    :param stream:
+    :return:
+        int: stream 정수 값
+    """
+
+    index = stream.read(1)[0]
+    if index == 0xfd:
+        # 0xfd 는 2byte 를 리틀엔디언으로 읽음
+        return little_endian_to_int(stream.read(2))
+    elif index == 0xfe:
+        # 0xfe 는 4byte 를 리틀엔디언으로 읽음
+        return little_endian_to_int(stream.read(4))
+    elif index == 0xff:
+        # 0xff 는 8byte 를 리틀엔디언으로 읽음
+        return little_endian_to_int(stream.read(8))
+    else:
+        # anything else is just the integer ??
+        return index
+
+def encode_variant(integer_value):
+    """
+    정수값을 받아 variant 형식으로 변환된 bytes형 값을 반환함
+    :param integer_value:
+    :return:
+        bytes: 정수값을 bytes 형태
+    """
+    if integer_value < 0xfd:
+        return bytes([integer_value])
+    elif integer_value < 0x10000: # 65536 pow(2, 16)-1
+        return b'\xfd' + int_to_little_endian(integer_value, 2)
+    elif integer_value < 0x100000000:
+        return b'\xfe' + int_to_little_endian(integer_value, 4) # 4294967296, pow(2, 32)-1
+    elif integer_value < 0x10000000000000000:
+        return b'\xff' + int_to_little_endian(integer_value, 8) # 18446744073709551616, pow(2, 64)-1
+    else:
+        raise ValueError(f'integer too large: {integer_value}')
+
