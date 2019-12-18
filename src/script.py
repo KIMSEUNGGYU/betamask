@@ -1,180 +1,86 @@
-from io import BytesIO
-from logging import getLogger
-from unittest import TestCase
-
-from lib.helper import (
-    encode_variant,
-    int_to_little_endian,
-    little_endian_to_int,
-    read_variant,
-    run
-)
-from src.op import (
-    OP_CODE_FUNCTIONS,
-    OP_CODE_NAMES,
-)
-
-
-LOGGER = getLogger(__name__)
+from lib.helper import (read_variant, encode_variant, little_endian_to_int, int_to_little_endian)
 
 class Script:
     def __init__(self, cmds=None):
         if cmds is None:
             self.cmds = []
         else:
-            self.cmds = cmds
-
-    def __repr__(self):
-        result = []
-        for cmd in self.cmds:
-            if type(cmd) == int:
-                if OP_CODE_NAMES.get(cmd):
-                    name = OP_CODE_NAMES.get(cmd)
-                else:
-                    name = 'OP_[{}]'.format(cmd)
-                result.append(name)
-            else:
-                result.append(cmd.hex())
-        return ' '.join(result)
+            self.cmds = cmds            # 명령어를 실행할 공간으로 연산자 와 피연산자로 구성
 
     @classmethod
-    def parse(cls, s):
-        # get the length of the entire field
-        length = read_variant(s)
-        # initialize the cmds array
+    def parse(cls, stream):
+        print("script2")
+        """
+        스크립트 값인 bytes 값을 받아 Script 객체로 생성
+        :param stream:
+            bytes: 스크립트 값, 바이트 타입
+        :return:
+        """
+        length = read_variant(stream)   # 전체 스크립트의 길이를 읽음 (이싱후에 count 와 비교하기 위해서 - 스크립트 길이만 파싱하기 위함 )
         cmds = []
-        # initialize the number of bytes we've read to 0
         count = 0
-        # loop until we've read length bytes
-        while count < length:
-            # get the current byte
-            current = s.read(1)
-            # increment the bytes we've read
+
+        while count < length:           # 정확히 스크립트 길이만큼만 파싱하기 위해서
+            current = stream.read(1)    # 1 byte 파싱 - 원소인지? 연산자 인지? 판단하기 위해서
             count += 1
-            # convert the current byte to an integer
-            current_byte = current[0]
-            # if the current byte is between 1 and 75 inclusive
-            if current_byte >= 1 and current_byte <= 75:
-                # we have an cmd set n to be the current byte
+            current_byte = current[0]   # bytes 값을 정수형으로 변환
+            if current_byte >= 1 and current_byte <= 75:                #  1 ~ 75 범위라면 다음 n byte 가 하나의 원소
                 n = current_byte
-                # add the next n bytes as an cmd
-                cmds.append(s.read(n))
-                # increase the count by n
+                cmds.append(stream.read(n))
                 count += n
-            elif current_byte == 76:
-                # op_pushdata1
-                data_length = little_endian_to_int(s.read(1))
-                cmds.append(s.read(data_length))
+            elif current_byte == 76:                                    # 76은 OP_PUSHDATA1 을 의미 - 1 byte 를 더 읽어 파싱할 원소의 길이를 얻어야 함
+                data_length = little_endian_to_int(stream.read(1))      # 1 byte 더 읽음
+                cmds.append(stream.read(data_length))
                 count += data_length + 1
-            elif current_byte == 77:
-                # op_pushdata2
-                data_length = little_endian_to_int(s.read(2))
-                cmds.append(s.read(data_length))
+            elif current_byte == 77:                                    # 77은 OP_PUSHDATA2 를 의미 - 2 byte 를 더 읽어 파싱할 원소의 길이를 얻어야 함
+                data_length = little_endian_to_int(stream.read(2))      # 2 byte 더 읽음
+                cmds.append(stream.read(data_length))
                 count += data_length + 2
             else:
-                # we have an opcode. set the current byte to op_code
-                op_code = current_byte
-                # add the op_code to the list of cmds
+                op_code = current_byte                                  # 해당 경우에는 OP_CODE 가 됨
                 cmds.append(op_code)
-        if count != length:
+
+        if count != length:                                             # 처음 스크립트 길이만큼 스크립트 파싱이 이루어졌는지 확인
             raise SyntaxError('parsing script failed')
+
         return cls(cmds)
 
     def raw_serialize(self):
-        # initialize what we'll send back
+        """
+        스크리트 직렬화 값 구하기
+        스크립트 객체를 bytes 값으로 변환음
+        :return:
+        """
         result = b''
-        # go through each cmd
         for cmd in self.cmds:
-            # if the cmd is an integer, it's an opcode
-            if type(cmd) == int:
-                # turn the cmd into a single byte integer using int_to_little_endian
-                result += int_to_little_endian(cmd, 1)
+            if type(cmd) == int:                                # 명령어가 정수값이면 연산자를 의미함
+                result += int_to_little_endian(cmd, 1)          ## cmd 라는 값을 1 byte 리틀엔디언으로 변환, 얘가 OP 코드 같음
             else:
-                # otherwise, this is an element
-                # get the length in bytes
-                length = len(cmd)
-                # for large lengths, we have to use a pushdata opcode
-                if length < 75:
-                    # turn the length into a single byte integer
+                length = len(cmd)                               ## 이부분이 피연산자 같음
+                if length <= 75:                                # 길이가 1 ~ 75 범위라면, 그 길이를 1 byte로 표현
                     result += int_to_little_endian(length, 1)
-                elif length > 75 and length < 0x100:
-                    # 76 is pushdata1
-                    result += int_to_little_endian(76, 1)
-                    result += int_to_little_endian(length, 1)
-                elif length >= 0x100 and length <= 520:
-                    # 77 is pushdata2
-                    result += int_to_little_endian(77, 1)
-                    result += int_to_little_endian(length, 2)
-                else:
+                elif length > 75 and length < 0x100:            # 길이가 76 ~ 255 범위라면, OP_PUSHDATA1 를 넣어주고, 1byte로 리틀엔디언으로 길이를 표현
+                    result += int_to_little_endian(76, 1)       ## OP_PUSHDATA1 의 키워드를 넣어주고
+                    result += int_to_little_endian(length, 1)   ## 길이 넣기 ? <- 무슨 길이지??
+                elif length >= 0x100 and length <= 520:         # 길이가 256 ~ 520 범위라면, OP_PUSHDATA2 를 넣어주고, 2byte 리틀엔디언으로 길이를 표현
+                    result += int_to_little_endian(77, 1)       ## OP_PUSHDATA2 의 키워드를 넣어주고
+                    result += int_to_little_endian(length, 2)   ## 길이 넣기 <- 무슨 길이?
+                else:                                           # 520 보다 긴 원소는 직렬화 불가능
                     raise ValueError('too long an cmd')
+
                 result += cmd
         return result
 
     def serialize(self):
-        # get the raw serialization (no prepended length)
+        """
+        스크립트는 "스크립트직렬화길이" 와 "스크립트직렬화값" 으로 구성되어있
+        :return:
+        """
         result = self.raw_serialize()
-        # get the length of the whole thing
         total = len(result)
-        # encode_varint the total length of the result and prepend
-        return encode_variant(total) + result
-
-    def evaluate(self, z):
-        # create a copy as we may need to add to this list if we have a
-        # RedeemScript
-        cmds = self.cmds[:]
-        stack = []
-        altstack = []
-        while len(cmds) > 0:
-            cmd = cmds.pop(0)
-            if type(cmd) == int:
-                # do what the opcode says
-                operation = OP_CODE_FUNCTIONS[cmd]
-                if cmd in (99, 100):
-                    # op_if/op_notif require the cmds array
-                    if not operation(stack, cmds):
-                        LOGGER.info('bad op: {}'.format(OP_CODE_NAMES[cmd]))
-                        return False
-                elif cmd in (107, 108):
-                    # op_toaltstack/op_fromaltstack require the altstack
-                    if not operation(stack, altstack):
-                        LOGGER.info('bad op: {}'.format(OP_CODE_NAMES[cmd]))
-                        return False
-                elif cmd in (172, 173, 174, 175):
-                    # these are signing operations, they need a sig_hash
-                    # to check against
-                    if not operation(stack, z):
-                        LOGGER.info('bad op: {}'.format(OP_CODE_NAMES[cmd]))
-                        return False
-                else:
-                    if not operation(stack):
-                        LOGGER.info('bad op: {}'.format(OP_CODE_NAMES[cmd]))
-                        return False
-            else:
-                # add the cmd to the stack
-                stack.append(cmd)
-        if len(stack) == 0:
-            return False
-        if stack.pop() == b'':
-            return False
-        return True
+        return encode_variant(total) + result                   # 직렬화된 스크립트 길이 + 직렬화된 스크립트
 
 
-class ScriptTest(TestCase):
-
-    def test_parse(self):
-        script_pubkey = BytesIO(bytes.fromhex('6a47304402207899531a52d59a6de200179928ca900254a36b8dff8bb75f5f5d71b1cdc26125022008b422690b8461cb52c3cc30330b23d574351872b7c361e9aae3649071c1a7160121035d5c93d9ac96881f19ba1f686f15f009ded7c62efe85a872e6a19b43c15a2937'))
-        script = Script.parse(script_pubkey)
-        want = bytes.fromhex('304402207899531a52d59a6de200179928ca900254a36b8dff8bb75f5f5d71b1cdc26125022008b422690b8461cb52c3cc30330b23d574351872b7c361e9aae3649071c1a71601')
-        self.assertEqual(script.cmds[0].hex(), want.hex())
-        want = bytes.fromhex('035d5c93d9ac96881f19ba1f686f15f009ded7c62efe85a872e6a19b43c15a2937')
-        self.assertEqual(script.cmds[1], want)
-
-    def test_serialize(self):
-        want = '6a47304402207899531a52d59a6de200179928ca900254a36b8dff8bb75f5f5d71b1cdc26125022008b422690b8461cb52c3cc30330b23d574351872b7c361e9aae3649071c1a7160121035d5c93d9ac96881f19ba1f686f15f009ded7c62efe85a872e6a19b43c15a2937'
-        script_pubkey = BytesIO(bytes.fromhex(want))
-        script = Script.parse(script_pubkey)
-        self.assertEqual(script.serialize().hex(), want)
 
 
-# run(ScriptTest("test_parse"))
-# run(ScriptTest("test_serialize"))
+

@@ -7,6 +7,7 @@ from io import BytesIO
 
 from lib.helper import (run, little_endian_to_int)
 from src.transaction import Transaction
+# from dump.script import Script
 from src.script import Script
 
 class TransactionTest(TestCase):
@@ -179,30 +180,24 @@ class TransactionTest(TestCase):
 
 
 
-# url = '{}/tx/{}.hex'.format(cls.get_url(testnet), tx_id)
-
-
-
-
-
 ## 테스트 코드 실행
 # run(TransactionTest("test_parse_version"))      # 트랜잭션 버전 parse 테스트
 # run(TransactionTest("test_parse_inputs"))       # 트랜잭션 inputs parse 테스트
 # run(TransactionTest("test_parse_outputs"))      # 트랜잭션 outputs parse 테스트
 # run(TransactionTest("test_parse_locktime"))     # 트랜잭션 lokctime parse 테스트
 # run(TransactionTest("test_fee"))                # 트랜잭션 수수료 테스트
-
-
-
-
+#
+#
+#
+#
 ## 책 예제 테스트 코드 실행
 # run(TransactionTest("exercise1"))       # 트랜잭션 값, 버전만 parsing 하기
 # run(TransactionTest("exercise2"))       # byte 값을 정수로 변환하는 예제
 # run(TransactionTest("exercise3"))       # 스크립트 파싱
 # run(TransactionTest("exercise4"))       # 트랜잭션 필드 값 찾기
 # run(TransactionTest("exercise5"))       # 실제 트랜잭션 값 파싱 및 수수료 파싱하기
-run(TransactionTest("exercise6"))       # 트랜잭션 필드 값 찾기
-
-
-
-
+# run(TransactionTest("exercise6"))       # 트랜잭션 필드 값 찾기
+#
+#
+#
+#

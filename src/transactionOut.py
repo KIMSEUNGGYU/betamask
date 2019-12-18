@@ -1,7 +1,6 @@
 from lib.helper import (little_endian_to_int, int_to_little_endian)
 from src.script import Script
 
-
 class TransactionOut:
     def __init__(self, amount, script_public_key):
         self.amount = amount
