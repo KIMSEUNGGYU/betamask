@@ -46,7 +46,7 @@ def encode_base58(str):
     return prefix + result
 
 
-def encode_base58_checksum(b):
+def encode_base58_checksum(bytes):
     """
     base58 로 부호화도 하고, 그 중간에 checksum도 넣고
 
@@ -60,23 +60,33 @@ def encode_base58_checksum(b):
     가  있는데 그 중에서 4, 5 방식을 처리, 입력받은 파리미터 값이 3 단계의 값
 
 
-    :param b: prefix(네트워크 종류) + sec 값 합친 값 - bytes 타입
+    :param bytes:
+        byte[]: prefix(네트워크 종류) + sec 값 합친 값 - bytes 타입
     :return:
     """
-    return encode_base58(b + hash256(b)[:4])
+    return encode_base58(bytes + hash256(bytes)[:4])
 
 
-## 내가 안 짬
-def decode_base58(s):
+def decode_base58(str):
+    """
+    base58 복호화 -> 결국은 sha160 값을 추출함
+    :param str:
+        비트코인 주소? 문자열
+    :return:
+    """
     num = 0
-    for c in s:
+
+    # base58 진수를 바이트 값으로 변경
+    for c in str:
         num *= 58
-        num += BASE58_ALPHABET.index(c)
-    combined = num.to_bytes(25, byteorder='big')
+        num += BASE58_ALPHABET.index(c)             # base58 의 값을 정수로 변환
+    combined = num.to_bytes(25, byteorder='big')    # 정수로 나열된 값을 byte 값으로 변환
     checksum = combined[-4:]
     if hash256(combined[:-4])[:4] != checksum:
         raise ValueError('bad address: {} {}'.format(checksum, hash256(combined[:-4])[:4]))
-    return combined[1:-4]
+
+    return combined[1:-4]   # 기존의 sha160 값 만듦
+                            # 네트워크 주소를 뜻하는 keyworkd (1byte) 체크섬(4byte)를 제외한 값,
 
 
 
