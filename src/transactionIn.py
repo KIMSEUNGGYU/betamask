@@ -13,7 +13,7 @@ class TransactionIn:
         self.sequence = sequence
 
     def __repr__(self):
-        return f'{self.previous_transaction.hex()}:{self.previous_index}'
+        return f'\t{self.previous_transaction.hex()}:{self.previous_index}'
 
     @classmethod
     def parse(cls, stream):

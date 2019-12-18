@@ -18,9 +18,7 @@ class TxFetcher:
     def fetch(cls, tx_id, testnet=False, fresh=False):
         from src.transaction import Transaction
 
-        print("tx_id", tx_id)
         if fresh or (tx_id not in cls.cache):
-            print("******* in ********")
             url = '{}/tx/{}.hex'.format(cls.get_url(testnet), tx_id)
             response = requests.get(url)
             try:
@@ -39,7 +37,6 @@ class TxFetcher:
             cls.cache[tx_id] = tx
         cls.cache[tx_id].testnet = testnet
 
-        # print("cache", cls.cache)
         return cls.cache[tx_id]
 
     @classmethod

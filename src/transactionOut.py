@@ -8,7 +8,7 @@ class TransactionOut:
         self.script_public_key = script_public_key
 
     def __repr__(self):
-        return f'{self.amount}:{self.script_public_key}'
+        return f'\t{self.amount}:{self.script_public_key}'
 
     @classmethod
     def parse(cls, stream):
