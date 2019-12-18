@@ -147,6 +147,38 @@ class TransactionTest(TestCase):
         print("수수료 값:", transaction.fee())
 
 
+    def exercise6(self):
+        print("********** [트랜잭션 직렬화 ] **********")
+        # 필요한 데이터 설정
+        transaction_id = 'a3cce92d4e81de7bb1829dd3e78162c6359f88ae5149f8f6d843d9fe92d1fcbc'
+        main_net = 'http://mainnet.programmingbitcoin.com'
+        test_net = 'http://testnet.programmingbitcoin.com'
+        url = '{}/tx/{}.hex'.format(main_net, transaction_id)
+
+        print("트랜잭션 raw data")
+        response = requests.get(url)
+        try:
+            transaction_raw = bytes.fromhex(response.text.strip())
+        except ValueError:
+            raise ValueError(f'unexpected response: {response.text}')
+
+        print(transaction_raw.hex())
+        if transaction_raw[4] == 0:
+            transaction_raw = transaction_raw[:4] + transaction_raw[6:]                 # transaction_raw 의 5번째 요소 제외함
+            transaction = Transaction.parse(BytesIO(transaction_raw), testnet=False)    # 메인넷 데이터 파싱
+            transaction.locktime = little_endian_to_int(transaction_raw[-4:])           # 마지막 4바이트 값을 locktime 으로
+        else:
+            transaction = Transaction.parse(BytesIO(transaction_raw), testnet=False)
+
+        if transaction.id() != transaction_id:
+            raise ValueError(f'파싱한 트션랜잭션 값{transaction.id()} 과 입력받은 트랜잭션 {transaction_id} 가 같지 않습니다.')
+
+        print("트랜잭션 직렬화:")
+        print(transaction.serialize().hex())
+
+
+
+
 # url = '{}/tx/{}.hex'.format(cls.get_url(testnet), tx_id)
 
 
@@ -168,7 +200,9 @@ class TransactionTest(TestCase):
 # run(TransactionTest("exercise2"))       # byte 값을 정수로 변환하는 예제
 # run(TransactionTest("exercise3"))       # 스크립트 파싱
 # run(TransactionTest("exercise4"))       # 트랜잭션 필드 값 찾기
-run(TransactionTest("exercise5"))       # 트랜잭션 필드 값 찾기
+# run(TransactionTest("exercise5"))       # 실제 트랜잭션 값 파싱 및 수수료 파싱하기
+run(TransactionTest("exercise6"))       # 트랜잭션 필드 값 찾기
+
 
 
 
