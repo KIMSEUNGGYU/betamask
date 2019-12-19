@@ -91,13 +91,6 @@ class Script:
         :return:
         """
         return Script(self.cmds + other.cmds)
-    # def __add___(self, other):
-    #     """
-    #     잠금 스크립트와 해제 스크립트를 결합시키는 코
-    #     :param other:드
-    #     :return:
-    #     """
-    #     return Script(self.cmds + other.cmds)       # 두 스크립트(잠금, 해제) 를 합하여 스크립트 객체 생성
 
     def evaluate(self, z):
         """
@@ -144,3 +137,20 @@ class Script:
 
         return True                     # 스크립트 유효한 경우
 
+
+    def __repr__(self):
+        """
+        스크립트 출력 문 재정의
+        :return:
+        """
+        result = []
+        for cmd in self.cmds:
+            if type(cmd) == int:
+                if OP_CODE_NAMES.get(cmd):
+                    name = OP_CODE_NAMES.get(cmd)
+                else:
+                    name = 'OP_[{}]'.format(cmd)
+                result.append(name)
+            else:
+                result.append(cmd.hex())
+        return ' '.join(result)
