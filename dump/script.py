@@ -6,10 +6,9 @@ from lib.helper import (
     encode_variant,
     int_to_little_endian,
     little_endian_to_int,
-    read_variant,
-    run
+    read_variant
 )
-from src.op import (
+from dump.op import (
     OP_CODE_FUNCTIONS,
     OP_CODE_NAMES,
 )
