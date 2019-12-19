@@ -1,7 +1,9 @@
 import os
 import sys
 sys.path.append(os.path.abspath("/Users/SG/git/bitcoin"))
+from io import BytesIO
 from unittest import TestCase
+
 
 from lib.helper import run
 from src.script import Script
@@ -9,6 +11,23 @@ from src.script import Script
 
 
 class ScriptTest(TestCase):
+    def test_parse(self):
+        print("********** [스크립트 test_parse ] **********")
+        script_pubkey = BytesIO(bytes.fromhex('6a47304402207899531a52d59a6de200179928ca900254a36b8dff8bb75f5f5d71b1cdc26125022008b422690b8461cb52c3cc30330b23d574351872b7c361e9aae3649071c1a7160121035d5c93d9ac96881f19ba1f686f15f009ded7c62efe85a872e6a19b43c15a2937'))
+        script = Script.parse(script_pubkey)
+        want = bytes.fromhex('304402207899531a52d59a6de200179928ca900254a36b8dff8bb75f5f5d71b1cdc26125022008b422690b8461cb52c3cc30330b23d574351872b7c361e9aae3649071c1a71601')
+        self.assertEqual(script.cmds[0].hex(), want.hex())
+        want = bytes.fromhex('035d5c93d9ac96881f19ba1f686f15f009ded7c62efe85a872e6a19b43c15a2937')
+        self.assertEqual(script.cmds[1], want)
+
+    def test_serialize(self):
+        print("********** [스크립트 test_serialize] **********")
+
+        want = '6a47304402207899531a52d59a6de200179928ca900254a36b8dff8bb75f5f5d71b1cdc26125022008b422690b8461cb52c3cc30330b23d574351872b7c361e9aae3649071c1a7160121035d5c93d9ac96881f19ba1f686f15f009ded7c62efe85a872e6a19b43c15a2937'
+        script_pubkey = BytesIO(bytes.fromhex(want))
+        script = Script.parse(script_pubkey)
+        self.assertEqual(script.serialize().hex(), want)
+
     def exercise1(self):
         print("********** [스크립트 p2pk 테스트 ] **********")
         z = 0x7c076ff316692a3d7eb3c3bb0f8b1488cf72e1afcd929e29307032997a838a3d
@@ -40,7 +59,11 @@ class ScriptTest(TestCase):
         # print(combined_script.evaluate(0))
 
 
+# run(ScriptTest("test_parse"))
+run(ScriptTest("test_serialize"))
 
-run(ScriptTest("exercise1"))
-run(ScriptTest("exercise2"))
-run(ScriptTest("exercise3"))
+
+##
+# run(ScriptTest("exercise1"))
+# run(ScriptTest("exercise2"))
+# run(ScriptTest("exercise3"))
