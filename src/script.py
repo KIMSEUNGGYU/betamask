@@ -1,4 +1,9 @@
+from logging import getLogger
+
 from lib.helper import (read_variant, encode_variant, little_endian_to_int, int_to_little_endian)
+from src.op import (OP_CODE_FUNCTIONS, OP_CODE_NAMES)
+
+LOGGER = getLogger(__name__)
 
 class Script:
     def __init__(self, cmds=None):
@@ -9,7 +14,6 @@ class Script:
 
     @classmethod
     def parse(cls, stream):
-        print("script2")
         """
         스크립트 값인 bytes 값을 받아 Script 객체로 생성
         :param stream:
@@ -80,7 +84,63 @@ class Script:
         total = len(result)
         return encode_variant(total) + result                   # 직렬화된 스크립트 길이 + 직렬화된 스크립트
 
+    def __add__(self, other):
+        """
+        잠금 스크립트와 해제 스크립트를 결합시키는 코
+        :param other:
+        :return:
+        """
+        return Script(self.cmds + other.cmds)
+    # def __add___(self, other):
+    #     """
+    #     잠금 스크립트와 해제 스크립트를 결합시키는 코
+    #     :param other:드
+    #     :return:
+    #     """
+    #     return Script(self.cmds + other.cmds)       # 두 스크립트(잠금, 해제) 를 합하여 스크립트 객체 생성
 
+    def evaluate(self, z):
+        """
 
+        - 실제 스택 구조 처럼 사용하지 않는 거 같음 LIFO 방식인데... 배열로 구성했을 때 마지막 원소가 아닌, 맨 첫번째 원소부터 뺌
+        :param z:
+        :return:
+        """
+        cmds = self.cmds[:]             # 전체 복사
+        stack = []
+        altstack = []
 
+        while len(cmds) > 0:
+            cmd = cmds.pop(0)           # 스택의 맨 첫번째 요소, 맨 왼쪽 요소 꺼냄
+
+            if type(cmd) == int:        # 연산자 - cmd 가 정수면 연산자
+                operation = OP_CODE_FUNCTIONS[cmd]                      # op코드에 해당하는 연산자
+
+                if cmd in (99, 100):                                    # 99와 100인 경우 - OP_IF 와 OP_NOTIF 연산자
+                    if not operation(stack, cmds):
+                        LOGGER.info(f'bad op: {OP_CODE_NAMES[cmd]}')
+                        return False
+                elif cmd in (107, 108):                                 # 107, 108인 경우 - OP_TOALTSTAK, OP_FROMALTSTAK 연산자
+                    if not operation(stack, altstack):
+                        LOGGER.info(f'bad op: {OP_CODE_NAMES[cmd]}')
+                        return False
+                elif cmd in (172, 173, 174, 175):
+                    # 172, 173, 174, 175인 경우 - OP_CHECKSIG, OP_CHECKSIGVERIFY, OP_CHECKMULTISIG, OP_CHECKMULTISIGVERIFY
+                    if not operation(stack, z):
+                        LOGGER.info(f'bad op: {OP_CODE_NAMES[cmd]}')
+                        return False
+                else:                   # 피연산자(원소) - 명령어가 원소
+                    if not operation(stack):
+                        LOGGER.info(f'bad op: {OP_CODE_NAMES[cmd]}')
+                        return False
+            else:                       # 엘리먼트(요소)
+                stack.append(cmd)
+
+        if len(stack) == 0:             # 모든 명령어를 실행 후, 스택이 비어있으면 스크립트 유효성 실패
+            return False
+
+        if stack.pop() == b'':          # 최상위 요소가 0 인경우 - 공 바이트(b'')
+            return False
+
+        return True                     # 스크립트 유효한 경우
 
