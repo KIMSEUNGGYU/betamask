@@ -71,7 +71,7 @@ class TransactionIn:
         :return:
         """
         tx = self.fetch_tx(testnet=testnet)
-        return tx.tx_outputs[self.previous_index].script_publick_key
+        return tx.tx_outputs[self.previous_index].script_public_key
 
 
 
