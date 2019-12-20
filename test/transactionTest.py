@@ -5,10 +5,13 @@ import requests
 from unittest import TestCase
 from io import BytesIO
 
-from lib.helper import (run, little_endian_to_int)
+from lib.helper import (run, little_endian_to_int, hash256)
 from src.transaction import Transaction
-# from dump.script import Script
+from src.transactionIn import TransactionIn
 from src.script import Script
+from src.s256Point import S256Point
+from src.signature import Signature
+
 
 class TransactionTest(TestCase):
     # cache_file = '../tx.cache'
@@ -62,6 +65,31 @@ class TransactionTest(TestCase):
         tx = Transaction.parse(stream)
         self.assertEqual(tx.locktime, 410393)
 
+    def test_serialize(self):
+        print("********** [트랜잭션 직렬화 테스트] **********")
+        raw_tx = bytes.fromhex('0100000001813f79011acb80925dfe69b3def355fe914bd1d96a3f5f71bf8303c6a989c7d1000000006b483045022100ed81ff192e75a3fd2304004dcadb746fa5e24c5031ccfcf21320b0277457c98f02207a986d955c6e0cb35d446a89d3f56100f4d7f67801c31967743a9c8e10615bed01210349fc4e631e3624a545de3f89f5d8684c7b8138bd94bdd531d2e213bf016b278afeffffff02a135ef01000000001976a914bc3b654dca7e56b04dca18f2566cdaf02e8d9ada88ac99c39800000000001976a9141c4bc762dd5423e332166702cb75f40df79fea1288ac19430600')
+        stream = BytesIO(raw_tx)
+        tx = Transaction.parse(stream)
+        self.assertEqual(tx.serialize(), raw_tx)
+
+    def test_input_value(self):
+        print("********** [트랜잭션 입력의 출력값 구하기] **********")
+        tx_hash = 'd1c789a9c60383bf715f3f6ad9d14b91fe55f3deb369fe5d9280cb1a01793f81'
+        index = 0
+        want = 42505594
+        tx_in = TransactionIn(bytes.fromhex(tx_hash), index)
+        print('트랜잭션 입력의 출력값:', tx_in.value())
+        self.assertEqual(tx_in.value(), want)
+
+    def test_input_pubkey(self):
+        print("********** [트랜잭션 잠금 스크립트 구하기] **********")
+        tx_hash = 'd1c789a9c60383bf715f3f6ad9d14b91fe55f3deb369fe5d9280cb1a01793f81'
+        index = 0
+        tx_in = TransactionIn(bytes.fromhex(tx_hash), index)
+        want = bytes.fromhex('1976a914a802fc56c704ce87c42d7c92eb75e7896bdc41ae88ac')
+        print("트랜잭션 잠금 스크립트: ", tx_in.script_public_key())
+        self.assertEqual(tx_in.script_public_key().serialize(), want)
+
     def test_fee(self):
         print("********** [트랜잭션 fee parse 테스트] **********")
         raw_tx = bytes.fromhex('0100000001813f79011acb80925dfe69b3def355fe914bd1d96a3f5f71bf8303c6a989c7d1000000006b483045022100ed81ff192e75a3fd2304004dcadb746fa5e24c5031ccfcf21320b0277457c98f02207a986d955c6e0cb35d446a89d3f56100f4d7f67801c31967743a9c8e10615bed01210349fc4e631e3624a545de3f89f5d8684c7b8138bd94bdd531d2e213bf016b278afeffffff02a135ef01000000001976a914bc3b654dca7e56b04dca18f2566cdaf02e8d9ada88ac99c39800000000001976a9141c4bc762dd5423e332166702cb75f40df79fea1288ac19430600')
@@ -112,7 +140,6 @@ class TransactionTest(TestCase):
         print(f'첫 번째 출력의 잠금 스크립트: {transaction_object.tx_outputs[0].script_public_key}')
         print(f'두 번째 출력의 비트코인 금액: {transaction_object.tx_outputs[1].amount}')
 
-
     def exercise5(self):
         print("********** [실제 트랜잭션 값 파싱 및 수수료 파싱하기 ] **********")
 
@@ -147,7 +174,6 @@ class TransactionTest(TestCase):
         print(transaction.tx_inputs)
         print("수수료 값:", transaction.fee())
 
-
     def exercise6(self):
         print("********** [트랜잭션 직렬화 ] **********")
         # 필요한 데이터 설정
@@ -177,6 +203,56 @@ class TransactionTest(TestCase):
         print("트랜잭션 직렬화:")
         print(transaction.serialize().hex())
 
+    def exercise7(self):
+        print("********** [ 트랜잭션 수수료 검증 ] **********")
+        raw_transaction = ('0100000001813f79011acb80925dfe69b3def355fe914bd1d96a3f5f71bf8303c6a989c7d1000000006b483045022100ed81ff192e75a3fd2304004dcadb746fa5e24c5031ccfcf21320b0277457c98f02207a986d955c6e0cb35d446a89d3f56100f4d7f67801c31967743a9c8e10615bed01210349fc4e631e3624a545de3f89f5d8684c7b8138bd94bdd531d2e213bf016b278afeffffff02a135ef01000000001976a914bc3b654dca7e56b04dca18f2566cdaf02e8d9ada88ac99c39800000000001976a9141c4bc762dd5423e332166702cb75f40df79fea1288ac19430600')
+        stream = BytesIO(bytes.fromhex(raw_transaction))
+        transaction = Transaction.parse(stream)
+        # print('transaction', transaction)
+        # print("transaction fee", transaction.fee())
+        print("트랜잭션 수수료가 0 보다 큰가요?", transaction.fee() > 0 )
+
+    def exercise8(self):
+        print("********** [ 서명 확인 ] **********")
+        sec = bytes.fromhex('0349fc4e631e3624a545de3f89f5d8684c7b8138bd94bdd531d2e213bf016b278a')
+        der = bytes.fromhex('3045022100ed81ff192e75a3fd2304004dcadb746fa5e24c5031ccfcf21320b0277457c98f02207a986d955c6e0cb35d446a89d3f56100f4d7f67801c31967743a9c8e10615bed')
+        z = 0x27e0c5994dec7824e56dec6b2fcb342eb7cdb0d0957c2fce9882f715e85d81a6
+
+        public_point = S256Point.parse(sec)
+        signature = Signature.parse(der)
+        print('서명이 유효한가요?', public_point.verify(z, signature))
+
+    def exercise9(self):
+        """
+        서명 해시 z 값 구하기 로직
+        1. 해제스크립트 부분 대신에 잠금스크립트로 대체한다.
+        2. 1의 결과 값을 hash256 작업을 수행한다.
+        3. 2의 결과 값을 32byte 빅엔디언 정수형으로 변환.    # 서명해시 값 생성
+        """
+        print("********** [ 서명 해시 z 값 구하기 ] **********")
+        ## 서명해시 값을 이전 트랜잭션의 잠금 스크립트로 대체한 값
+        modified_transaction = bytes.fromhex('0100000001813f79011acb80925dfe69b3def355fe914bd1d96a3f5f71bf8303c6a989c7d1000000001976a914a802fc56c704ce87c42d7c92eb75e7896bdc41ae88acfeffffff02a135ef01000000001976a914bc3b654dca7e56b04dca18f2566cdaf02e8d9ada88ac99c39800000000001976a9141c4bc762dd5423e332166702cb75f40df79fea1288ac1943060001000000')
+        hash256_value = hash256(modified_transaction)
+        z = int.from_bytes(hash256_value, 'big')        # 서명해시 값
+        print("서명해시 값:", hex(z))
+
+    def exercise10(self):
+        print("********** [ 서명 검증하기 ] **********")
+        sec = bytes.fromhex('0349fc4e631e3624a545de3f89f5d8684c7b8138bd94bdd531d2e213bf016b278a')
+        der = bytes.fromhex('3045022100ed81ff192e75a3fd2304004dcadb746fa5e24c5031ccfcf21320b0277457c98f02207a986d955c6e0cb35d446a89d3f56100f4d7f67801c31967743a9c8e10615bed')
+
+        ## 공개키, 서명 값 구하기
+        public_key = S256Point.parse(sec)   # 역질렬화 -> 공개키 나옴
+        signature = Signature.parse(der)    # 역질렬화 -> 서명 나옴
+
+        ## 서명 해시 z 값 구하기
+        modified_transaction = bytes.fromhex('0100000001813f79011acb80925dfe69b3def355fe914bd1d96a3f5f71bf8303c6a989c7d1000000001976a914a802fc56c704ce87c42d7c92eb75e7896bdc41ae88acfeffffff02a135ef01000000001976a914bc3b654dca7e56b04dca18f2566cdaf02e8d9ada88ac99c39800000000001976a9141c4bc762dd5423e332166702cb75f40df79fea1288ac1943060001000000')
+        hash256_value = hash256(modified_transaction)
+        z = int.from_bytes(hash256_value, 'big')
+
+        ## 검증  수행
+        print("검증 결과:", public_key.verify(z, signature))
+
 
 
 
@@ -185,6 +261,13 @@ class TransactionTest(TestCase):
 # run(TransactionTest("test_parse_inputs"))       # 트랜잭션 inputs parse 테스트
 # run(TransactionTest("test_parse_outputs"))      # 트랜잭션 outputs parse 테스트
 # run(TransactionTest("test_parse_locktime"))     # 트랜잭션 lokctime parse 테스트
+
+# run(TransactionTest("test_serialize"))          #
+# run(TransactionTest("test_input_value"))        #
+run(TransactionTest("test_input_pubkey"))       #
+
+
+
 # run(TransactionTest("test_fee"))                # 트랜잭션 수수료 테스트
 #
 #
@@ -197,7 +280,9 @@ class TransactionTest(TestCase):
 # run(TransactionTest("exercise4"))       # 트랜잭션 필드 값 찾기
 # run(TransactionTest("exercise5"))       # 실제 트랜잭션 값 파싱 및 수수료 파싱하기
 # run(TransactionTest("exercise6"))       # 트랜잭션 필드 값 찾기
-#
-#
+# run(TransactionTest("exercise7"))       # 트랜잭션 수수료 검증
+# run(TransactionTest("exercise8"))       # 서명 검증
+# run(TransactionTest("exercise9"))       # 서명 해시 z 값 구하기
+# run(TransactionTest("exercise10"))       # 서명 검증하기
 #
 #
