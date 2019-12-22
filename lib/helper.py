@@ -1,6 +1,11 @@
 from unittest import TestSuite, TextTestRunner
 import hashlib
 
+## 해시 유형
+SIGNATURE_HASH_ALL = 1
+SIGNATURE_HASH_NONE = 2
+SIGNATURE_HASH_SINGLE = 3
+
 BASE58_ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
 
 ## TEST 실행
