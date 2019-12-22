@@ -6,6 +6,7 @@ from io import BytesIO
 import json
 
 from lib.helper import little_endian_to_int
+from lib.config import FETCH_HEADERS_OPTION
 
 BASE_URL = 'https://sochain.com/api/v2/get_tx/'
 MAIN_NET = 'BTC/'
@@ -18,24 +19,6 @@ class TxFetcher:
     def fetch(cls, transaction_id, testnet=False):
         cls.load_cache('./tx')
 
-        headers_option = {
-            'Host': 'sochain.com',
-            # 'Connection': 'keep-alive',
-            # 'Pragma': 'no-cache',
-            # 'Cache-Control': 'no-cache',
-            # 'DNT': '1',
-            # 'Upgrade-Insecure-Requests': '1',
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36',
-            # 'Sec-Fetch-User': '?1',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9;*',
-            # 'Sec-Fetch-Site': 'same-origin',
-            # 'Sec-Fetch-Mode': 'navigate',
-            # 'Referer': 'https://sochain.com/api/v2/get_tx/BTCTEST/1dcdfdbcdd3ccb8bceb7a984386454a9df6ea841a251017938d3691cfb006318',
-            # 'Accept-Encoding': 'gzip, deflate, br',
-            # 'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
-            'Cookie': '__cfduid=df75ba7d6a3580c36abf35b749197ad351576993478; _ga=GA1.2.552005313.1576993773; cf_clearance=cde33a8e14fccb7be83333e850b174ac16d25012-1576999325-0-150'
-        }
-
         if transaction_id not in cls.cache:
             if testnet:
                 url = BASE_URL + TEST_NET
@@ -43,7 +26,7 @@ class TxFetcher:
                 url = BASE_URL + MAIN_NET
             url += transaction_id
 
-            response = requests.get(url, headers=headers_option)
+            response = requests.get(url, headers=FETCH_HEADERS_OPTION)
             if response.status_code == 200:
                 from src.transaction import Transaction
                 # 응답 데이터 중에서 받고 싶은 데이터만 받기
