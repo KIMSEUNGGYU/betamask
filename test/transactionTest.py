@@ -5,12 +5,17 @@ import requests
 from unittest import TestCase
 from io import BytesIO
 
-from lib.helper import (run, little_endian_to_int, hash256)
+from lib.helper import (run, little_endian_to_int, hash256, decode_base58, SIGNATURE_HASH_ALL)
 from src.transaction import Transaction
 from src.transactionIn import TransactionIn
-from src.script import Script
+from src.transactionOut import TransactionOut
+from src.script import (Script, p2pkh_script)
 from src.s256Point import S256Point
 from src.signature import Signature
+from src.privatekey import PrivateKey
+
+# from src.transactionFetcher import TxFetcher
+from src.transactionFetcher import TxFetcher2
 
 
 class TransactionTest(TestCase):
@@ -101,6 +106,55 @@ class TransactionTest(TestCase):
         stream = BytesIO(raw_tx)
         tx = Transaction.parse(stream)
         self.assertEqual(tx.fee(), 140500)
+
+
+    # 추가해야함 테스트 코드
+    def test_sig_hash(self):
+        print("********** [트랜잭션 서명 해시 구하는 방법?] **********")
+        tx = TxFetcher.fetch('452c629d67e41baec3ac6f04fe744b4b9617f8f859c63b3002f8684e7a4fee03')
+        # want = int('27e0c5994dec7824e56dec6b2fcb342eb7cdb0d0957c2fce9882f715e85d81a6', 16)
+        # self.assertEqual(tx.signature_hash(0), want)
+
+    def test_sig_hash2(self):
+        print("********** [트랜잭션 서명 해시 구하는 방법 22222] **********")
+        tx = TxFetcher2.fetch('452c629d67e41baec3ac6f04fe744b4b9617f8f859c63b3002f8684e7a4fee03', testnet=False)
+        want = int('27e0c5994dec7824e56dec6b2fcb342eb7cdb0d0957c2fce9882f715e85d81a6', 16)
+        self.assertEqual(tx.signature_hash(0), want)
+
+
+    def test_verify_p2pkh(self):
+        """ 테스트넷은 에러가 남 """
+        print("********** [트랜잭션 p2pkh 서명 검증?] **********")
+        tx = TxFetcher.fetch('452c629d67e41baec3ac6f04fe744b4b9617f8f859c63b3002f8684e7a4fee03')
+        self.assertTrue(tx.verify())
+        # tx = TxFetcher.fetch('5418099cc755cb9dd3ebc6cf1a7888ad53a1a3beb5a025bce89eb1bf7f1650a2', testnet=True)
+        # self.assertTrue(tx.verify())
+
+    def test_verify_p2pkh2(self):
+        """ 테스트넷은 에러가 남 """
+        print("********** [트랜잭션 p2pkh 서명 검증? 2222] **********")
+        tx = TxFetcher2.fetch('452c629d67e41baec3ac6f04fe744b4b9617f8f859c63b3002f8684e7a4fee03')
+        self.assertTrue(tx.verify())
+
+
+    def test_verify_p2sh(self):
+        tx = TxFetcher.fetch('46df1a9484d0a81d03ce0ee543ab6e1a23ed06175c104a178268fad381216c2b')
+        self.assertTrue(tx.verify())
+
+    def test_verify_p2sh2(self):
+        print("********** [ 2222 ] **********")
+        tx = TxFetcher2.fetch('46df1a9484d0a81d03ce0ee543ab6e1a23ed06175c104a178268fad381216c2b')
+        self.assertTrue(tx.verify())
+
+    def test_sign_input(self):      # 잘안됨
+        pass
+        # private_key = PrivateKey(secret=8675309)
+        # stream = BytesIO(bytes.fromhex('010000000199a24308080ab26e6fb65c4eccfadf76749bb5bfa8cb08f291320b3c21e56f0d0d00000000ffffffff02408af701000000001976a914d52ad7ca9b3d096a38e752c2018e6fbc40cdf26f88ac80969800000000001976a914507b27411ccf7f16f10297de6cef3f291623eddf88ac00000000'))
+        # tx_obj = Transaction.parse(stream, testnet=True)
+        # self.assertTrue(tx_obj.signature_input(0, private_key))
+        # want = '010000000199a24308080ab26e6fb65c4eccfadf76749bb5bfa8cb08f291320b3c21e56f0d0d0000006b4830450221008ed46aa2cf12d6d81065bfabe903670165b538f65ee9a3385e6327d80c66d3b502203124f804410527497329ec4715e18558082d489b218677bd029e7fa306a72236012103935581e52c354cd2f484fe8ed83af7a3097005b2f9c60bff71d35bd795f54b67ffffffff02408af701000000001976a914d52ad7ca9b3d096a38e752c2018e6fbc40cdf26f88ac80969800000000001976a914507b27411ccf7f16f10297de6cef3f291623eddf88ac00000000'
+        # self.assertEqual(tx_obj.serialize().hex(), want)  #
+
 
     def exercise1(self):
         #[연습문제 5.1]
@@ -254,6 +308,198 @@ class TransactionTest(TestCase):
         print("검증 결과:", public_key.verify(z, signature))
 
 
+    def exercise11(self):
+        print("********** [ 트랜잭션 생성하기 ] **********")
+        # from helper import decode_base58, SIGHASH_ALL
+        # from script import p2pkh_script, Script
+        # from tx import TxIn, TxOut, Tx
+        SATOSHI = 100000000
+
+        previous_transaction = bytes.fromhex('0d6fe5213c0b3291f208cba8bfb59b7476dffacc4e5cb66f6eb20a080843a299')
+        previous_index = 13
+
+        transaction_inputs= TransactionIn(previous_transaction=previous_transaction, previous_index=previous_index)
+
+        transaction_oupts = []
+
+        change_amount = int(0.33 * SATOSHI)                                     # 사토시 단위, 1비트당 1억 사토시
+        change_h160 = decode_base58('mzx5YhAH9kNHtcN481u6WkjeHjYtVeKVh2')
+        change_script = p2pkh_script(change_h160)
+        change_output = TransactionOut(amount=change_amount, script_public_key=change_script)
+
+        target_amount = int(0.1 * SATOSHI)                                      # 사토시 단위, 1비트당 1억 사토시
+        target_h160 = decode_base58('mnrVtF8DWjMu839VW3rBfgYaAfKk8983Xf')
+        target_script = p2pkh_script(target_h160)
+        target_output = TransactionOut(amount=target_amount, script_public_key=target_script)
+
+        tx_obj = Transaction(1, [transaction_inputs], [change_output, target_output], 0, True)  # 테스트 넷
+        # transation_object = Transaction(1, )
+        print('tx_obj', tx_obj)
+
+    def exercise12(self):
+
+        ## 트랜잭션 얻기
+        # tx = TxFetcher2.fetch('1dcdfdbcdd3ccb8bceb7a984386454a9df6ea841a251017938d3691cfb006318', testnet=True)
+        secret = little_endian_to_int(b'gyu secret')
+        z = int.from_bytes(hash256(b"gyu's message"), 'big') # 메시지 생성
+
+        private_key = PrivateKey(secret)
+        private_key_secret = private_key.secret
+        public_key = private_key.point
+
+        print('비밀키', private_key_secret)
+        print('공개키', public_key)
+        print('메시지', z)
+
+        sign = private_key.sign(z)
+        print('서명', sign)
+        print()
+
+
+        # sec = public_key.sec().hex()
+        # der = sign.der().hex()
+        # print('공개키 직렬화', sec)
+        # print('서명 직렬화', der)
+
+        print('서명 검증:', public_key.verify(z, sign))
+
+
+
+        # print('point', private_key.point.sec().hex())
+        # address = private_key.point.address()       # 비트코인 주소
+        # public_key = decode_base58(address)
+
+
+
+
+        ##### 12 문제
+        # raw_tx = ('0100000001813f79011acb80925dfe69b3def355fe914bd1d96a3f5f71bf8303c6a989c7d1000000006b483045022100ed81ff192e75a3fd2304004dcadb746fa5e24c5031ccfcf21320b0277457c98f02207a986d955c6e0cb35d446a89d3f56100f4d7f67801c31967743a9c8e10615bed01210349fc4e631e3624a545de3f89f5d8684c7b8138bd94bdd531d2e213bf016b278afeffffff02a135ef01000000001976a914bc3b654dca7e56b04dca18f2566cdaf02e8d9ada88ac99c39800000000001976a9141c4bc762dd5423e332166702cb75f40df79fea1288ac19430600')
+        # stream = BytesIO(bytes.fromhex(raw_tx))
+        # transaction = Transaction.parse(stream)
+        # print("transaction", transaction)
+        #
+        # print("********** [ 해제 스크립트 생성하기 ] **********")     # 위에서 생성한 트랜잭션의 해제 스크립트
+        # index = 0
+        #
+        # z = transaction.signature_hash(index)
+        # private_key = PrivateKey(secret=8675309)
+        # der = private_key.sign(z).der()                 # 메시지 서명 생성 후 직렬화
+        # signature = der + SIGNATURE_HASH_ALL.to_bytes(1, 'big')     # 스크립트에 들어가는 서명은 DER 형식 + 1byte 해시 유형
+        # sec = private_key.point.sec()
+        # script_signature = Script([signature, sec])
+        # transaction.tx_inputs[index].script_signature = script_signature
+        # transaction.verify()
+        # # print(transaction.serialize().hex())
+
+    def exercise13(self):
+        print("********** [ 비트코인 주소 생성 ] **********")
+        secret = little_endian_to_int(b'gyu secret')
+        print('secret', secret)
+        private_key = PrivateKey(secret)
+        print("private_key.secret", private_key.secret)
+        public_point = private_key.point.address(compressed=True, testnet=True)
+        print("public_point", public_point)         # mq4zcoFEimt2vmYutHZ3jC9gLE9sehejRx
+
+    def exercise14(self):
+        print("********** [  ] **********")
+        SATOSHI = 100000000
+
+        ## 이전트랜잭션에서 나의 정보?
+        previous_transaction = bytes.fromhex('1dcdfdbcdd3ccb8bceb7a984386454a9df6ea841a251017938d3691cfb006318')
+        previous_index = 0
+
+        ## 목적지
+        target_address = 'mtSYsqiRFrfaTAN7y1EvBb3CBEadEF1a9R'       # 목적지 지갑 주소
+        target_amount = 0.00001
+
+        change_address = 'mq4zcoFEimt2vmYutHZ3jC9gLE9sehejRx'       # 자기 주소로 반환
+        change_amount = 0.00008
+
+
+        secret = little_endian_to_int(b'gyu secret')
+
+        private_key = PrivateKey(secret=secret)
+        tx_inputs = []
+        tx_inputs.append(TransactionIn(previous_transaction, previous_index))
+        print('tx_inputs', tx_inputs)
+
+
+        ## 목적 출력 생성
+        tx_outputs = []
+        target_hash160_value = decode_base58(target_address)               # 목적지 hash160 값
+        script_public_key = p2pkh_script(target_hash160_value)             # 잠금 스크립트
+        target_satoshis = int(target_amount * SATOSHI)
+        tx_outputs.append(TransactionOut(target_satoshis, script_public_key))
+        # print('target_satoshis', target_satoshis)
+
+        ## 잔돈을 받는 (자신에게 보내는) 출력 생성
+        change_hash160_value = decode_base58(change_address)
+        script_public_key = p2pkh_script(change_hash160_value)
+        change_satoshis = int(change_amount * SATOSHI)
+        # print("change_satoshis", change_satoshis)
+
+        tx_outputs.append(TransactionOut(change_satoshis, script_public_key))
+
+        transaction_object = Transaction(1, tx_inputs, tx_outputs, 0, testnet=True)
+        # print('tx_se', transaction_object.serialize().hex())
+        raw_tx = transaction_object.serialize().hex()
+
+        stream = BytesIO(bytes.fromhex(raw_tx))
+        transaction = Transaction.parse(stream)
+        print("transaction", transaction)
+
+        print("********** [ 해제 스크립트 생성하기 ] **********")     # 위에서 생성한 트랜잭션의 해제 스크립트
+        index = 0
+
+        z = transaction.signature_hash(index)
+        private_key = PrivateKey(secret=8675309)
+        der = private_key.sign(z).der()                 # 메시지 서명 생성 후 직렬화
+        signature = der + SIGNATURE_HASH_ALL.to_bytes(1, 'big')     # 스크립트에 들어가는 서명은 DER 형식 + 1byte 해시 유형
+        sec = private_key.point.sec()
+        script_signature = Script([signature, sec])
+        transaction.tx_inputs[index].script_signature = script_signature
+        transaction.verify()
+        # print(transaction.serialize().hex())
+
+        """
+        raw_tx = ('0100000001813f79011acb80925dfe69b3def355fe914bd1d96a3f5f71bf8303c6a989c7d1000000006b483045022100ed81ff192e75a3fd2304004dcadb746fa5e24c5031ccfcf21320b0277457c98f02207a986d955c6e0cb35d446a89d3f56100f4d7f67801c31967743a9c8e10615bed01210349fc4e631e3624a545de3f89f5d8684c7b8138bd94bdd531d2e213bf016b278afeffffff02a135ef01000000001976a914bc3b654dca7e56b04dca18f2566cdaf02e8d9ada88ac99c39800000000001976a9141c4bc762dd5423e332166702cb75f40df79fea1288ac19430600')
+        stream = BytesIO(bytes.fromhex(raw_tx))
+        transaction = Transaction.parse(stream)
+        print("transaction", transaction)
+
+        print("********** [ 해제 스크립트 생성하기 ] **********")     # 위에서 생성한 트랜잭션의 해제 스크립트
+        index = 0
+
+        z = transaction.signature_hash(index)
+        private_key = PrivateKey(secret=8675309)
+        der = private_key.sign(z).der()                 # 메시지 서명 생성 후 직렬화
+        signature = der + SIGNATURE_HASH_ALL.to_bytes(1, 'big')     # 스크립트에 들어가는 서명은 DER 형식 + 1byte 해시 유형
+        sec = private_key.point.sec()
+        script_signature = Script([signature, sec])
+        transaction.tx_inputs[index].script_signature = script_signature
+        print(transaction.serialize().hex())
+        """
+
+        # print('tx_output', tx_outputs)
+        # sec = private_key.point.sec()
+        # print('sec', sec.hex())
+        # private_key.sign()
+        # print('target', decode_base58(target_address).hex())
+        # print('change', decode_base58(change_address).hex())
+
+        # transaction_object = Transaction(1, tx_inputs, tx_outputs, 0, testnet=True)
+        # print(transaction_object.signature_input(0, private_key))
+        # print('** transaction_object ** ', transaction_object)
+        # print('** transaction_object fee ** ', transaction_object.fee())
+        # print('트랜잭션 검증:', transaction_object.verify())
+
+        # print('트랜잭션 직렬화:', transaction_object.serialize().hex())
+
+
+        # change_hash160_value = decode_base58(change_address)
+        # scri
+
+
 
 
 ## 테스트 코드 실행
@@ -264,25 +510,38 @@ class TransactionTest(TestCase):
 
 # run(TransactionTest("test_serialize"))          #
 # run(TransactionTest("test_input_value"))        #
-run(TransactionTest("test_input_pubkey"))       #
+# run(TransactionTest("test_input_pubkey"))       #
 
 
 
 # run(TransactionTest("test_fee"))                # 트랜잭션 수수료 테스트
-#
-#
-#
-#
+
+# run(TransactionTest("test_sig_hash"))           #
+# run(TransactionTest("test_sig_hash2"))          #
+
+# run(TransactionTest("test_verify_p2pkh"))       #
+# run(TransactionTest("test_verify_p2pkh2"))      #
+
+# run(TransactionTest("test_verify_p2sh"))        #
+# run(TransactionTest("test_verify_p2sh2"))       #
+
+# run(TransactionTest("test_sign_input"))         #
+
+
 ## 책 예제 테스트 코드 실행
-# run(TransactionTest("exercise1"))       # 트랜잭션 값, 버전만 parsing 하기
-# run(TransactionTest("exercise2"))       # byte 값을 정수로 변환하는 예제
-# run(TransactionTest("exercise3"))       # 스크립트 파싱
-# run(TransactionTest("exercise4"))       # 트랜잭션 필드 값 찾기
-# run(TransactionTest("exercise5"))       # 실제 트랜잭션 값 파싱 및 수수료 파싱하기
-# run(TransactionTest("exercise6"))       # 트랜잭션 필드 값 찾기
-# run(TransactionTest("exercise7"))       # 트랜잭션 수수료 검증
-# run(TransactionTest("exercise8"))       # 서명 검증
-# run(TransactionTest("exercise9"))       # 서명 해시 z 값 구하기
-# run(TransactionTest("exercise10"))       # 서명 검증하기
-#
-#
+# run(TransactionTest("exercise1"))               # 트랜잭션 값, 버전만 parsing 하기
+# run(TransactionTest("exercise2"))               # byte 값을 정수로 변환하는 예제
+# run(TransactionTest("exercise3"))               # 스크립트 파싱
+# run(TransactionTest("exercise4"))               # 트랜잭션 필드 값 찾기
+# run(TransactionTest("exercise5"))               # 실제 트랜잭션 값 파싱 및 수수료 파싱하기
+# run(TransactionTest("exercise6"))               # 트랜잭션 필드 값 찾기
+# run(TransactionTest("exercise7"))               # 트랜잭션 수수료 검증
+# run(TransactionTest("exercise8"))               # 서명 검증
+# run(TransactionTest("exercise9"))               # 서명 해시 z 값 구하기
+# run(TransactionTest("exercise10"))              # 서명 검증하기
+# run(TransactionTest("exercise11"))              # 서명 생성하기
+run(TransactionTest("exercise12"))              #
+# run(TransactionTest("exercise13"))              # 비트코인 주소 생성
+
+
+# run(TransactionTest("exercise14"))              #
