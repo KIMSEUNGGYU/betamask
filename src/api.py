@@ -6,14 +6,19 @@ from io import BytesIO
 from lib.helper import (little_endian_to_int)
 
 class TxFetcher():
+    tx_cache = {}
+    utxo_cache = {}
+
     @classmethod
     def fetch(cls, tx_id, testnet):
+        print('api, fetch fetch')
         base_url = 'https://api.blockcypher.com/v1/btc/test3/'
         method = 'txs/'
         option = '?includeHex=true'
         url = base_url + method + tx_id + option
 
         response = requests.get(url)
+
         if response.status_code == 200:
             from src.transaction import Transaction
             data = response.json()
@@ -43,11 +48,12 @@ class TxFetcher():
             # # cls.dump_cache('tx')
             # return cls.cache[transaction_id]
         else:
-            print("비정상 상태")
+            print("비정상 상태", response)
 
     @classmethod
     def fetchUTXO(cls, address, testnet=True):
-        # print('api, fetch')
+
+        print('api, fetch utxo')
         base_url = 'https://api.blockcypher.com/v1/btc/test3/'
         method = 'addrs/'
 
@@ -60,6 +66,7 @@ class TxFetcher():
 
 
         utxo_transaction = []
+        print('response', response)
         if response.status_code == 200:
             print("정상적 수행")
             datas = response.json()
