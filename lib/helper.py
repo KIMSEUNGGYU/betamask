@@ -1,6 +1,11 @@
 from unittest import TestSuite, TextTestRunner
 import hashlib
 
+## 해시 유형
+SIGNATURE_HASH_ALL = 1
+SIGNATURE_HASH_NONE = 2
+SIGNATURE_HASH_SINGLE = 3
+
 BASE58_ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
 
 ## TEST 실행
@@ -46,7 +51,7 @@ def encode_base58(str):
     return prefix + result
 
 
-def encode_base58_checksum(b):
+def encode_base58_checksum(bytes):
     """
     base58 로 부호화도 하고, 그 중간에 checksum도 넣고
 
@@ -60,23 +65,33 @@ def encode_base58_checksum(b):
     가  있는데 그 중에서 4, 5 방식을 처리, 입력받은 파리미터 값이 3 단계의 값
 
 
-    :param b: prefix(네트워크 종류) + sec 값 합친 값 - bytes 타입
+    :param bytes:
+        byte[]: prefix(네트워크 종류) + sec 값 합친 값 - bytes 타입
     :return:
     """
-    return encode_base58(b + hash256(b)[:4])
+    return encode_base58(bytes + hash256(bytes)[:4])
 
 
-## 내가 안 짬
-def decode_base58(s):
+def decode_base58(str):
+    """
+    base58 복호화 -> 결국은 sha160 값을 추출함
+    :param str:
+        비트코인 주소? 문자열
+    :return:
+    """
     num = 0
-    for c in s:
+
+    # base58 진수를 바이트 값으로 변경
+    for c in str:
         num *= 58
-        num += BASE58_ALPHABET.index(c)
-    combined = num.to_bytes(25, byteorder='big')
+        num += BASE58_ALPHABET.index(c)             # base58 의 값을 정수로 변환
+    combined = num.to_bytes(25, byteorder='big')    # 정수로 나열된 값을 byte 값으로 변환
     checksum = combined[-4:]
     if hash256(combined[:-4])[:4] != checksum:
         raise ValueError('bad address: {} {}'.format(checksum, hash256(combined[:-4])[:4]))
-    return combined[1:-4]
+
+    return combined[1:-4]   # 기존의 sha160 값 만듦
+                            # 네트워크 주소를 뜻하는 keyworkd (1byte) 체크섬(4byte)를 제외한 값,
 
 
 
@@ -99,3 +114,46 @@ def int_to_little_endian(n, length):
         bytes: 정수 n 의 리틀엔디언 방식 바이트값
     """
     return n.to_bytes(length, 'little')
+
+
+# ## 가변 정수 파싱 및 직렬화 기능 구현
+def read_variant(stream):
+    """
+    스트림으로부터 필요한 바이트 개수만큼 읽고 이를 정수로 반환함
+    :param stream:
+    :return:
+        int: stream 정수 값
+    """
+
+    index = stream.read(1)[0]
+    if index == 0xfd:
+        # 0xfd 는 2byte 를 리틀엔디언으로 읽음
+        return little_endian_to_int(stream.read(2))
+    elif index == 0xfe:
+        # 0xfe 는 4byte 를 리틀엔디언으로 읽음
+        return little_endian_to_int(stream.read(4))
+    elif index == 0xff:
+        # 0xff 는 8byte 를 리틀엔디언으로 읽음
+        return little_endian_to_int(stream.read(8))
+    else:
+        # anything else is just the integer ??
+        return index
+
+def encode_variant(integer_value):
+    """
+    정수값을 받아 variant 형식으로 변환된 bytes형 값을 반환함
+    :param integer_value:
+    :return:
+        bytes: 정수값을 bytes 형태
+    """
+    if integer_value < 0xfd:
+        return bytes([integer_value])
+    elif integer_value < 0x10000: # 65536 pow(2, 16)-1
+        return b'\xfd' + int_to_little_endian(integer_value, 2)
+    elif integer_value < 0x100000000:
+        return b'\xfe' + int_to_little_endian(integer_value, 4) # 4294967296, pow(2, 32)-1
+    elif integer_value < 0x10000000000000000:
+        return b'\xff' + int_to_little_endian(integer_value, 8) # 18446744073709551616, pow(2, 64)-1
+    else:
+        raise ValueError(f'integer too large: {integer_value}')
+
