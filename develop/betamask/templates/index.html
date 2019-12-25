@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>BetaMask</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/reset-css@4.0.1/reset.min.css"
+    />
+    <!-- <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename = './css/common.css')}}"
+    />
+
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename = './css/first-page.css')}}"
+    /> -->
+    <link rel="stylesheet" href="../static/css/common.css" />
+    <link rel="stylesheet" href="../static/css/index.css" />
+  </head>
+  <body>
+    <header></header>
+    <main>
+      <div class="container">
+        <img src="../static/images/logo.png" />
+        <!-- <img src="{{ url_for('static', filename = './images/logo.png')}}" /> -->
+      </div>
+
+      <div class="main-text">
+        <h1>베타마스크(비트코인 지갑) 오신 것을 환영합니다.</h1>
+      </div>
+      <div class="sub-text">
+        <p>베타마스크는 비트코인을 위한 안전한 저장소입니다.</p>
+        <p>We're happy to see you</p>
+      </div>
+      <div class="buttons">
+        <div class="button">
+          <a href="./signin.html"><button>로그인 하기</button></a>
+        </div>
+        <div class="button">
+          <a href="./signup.html"><button>회원가입 하기</button></a>
+        </div>
+      </div>
+    </main>
+    <footer></footer>
+  </body>
+  <!-- <script src=></script> -->
+  <!-- <script src="{{ url_for('static', filename = './js/first-page.js') }}"></script> -->
+</html>

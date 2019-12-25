@@ -1,0 +1,39 @@
+/* common */
+/* body {
+  margin-left: 100px;
+  margin-top: 50px;
+} */
+
+main {
+  margin-left: 100px;
+  margin-top: 50px;
+}
+header img {
+  width: 500px;
+  height: 100px;
+}
+
+button {
+  width: 200px;
+  height: 50px;
+  background-color: #1c7ed6;
+  color: white;
+  border: none;
+  border-radius: 7px;
+  font-size: 15px;
+  margin-bottom: 15px;
+}
+
+/* css clearfix */
+.clearfix::after {
+  content: '';
+  clear: both;
+  display: block;
+}
+
+.float--left {
+  float: left;
+}
+.float--right {
+  float: right;
+}
