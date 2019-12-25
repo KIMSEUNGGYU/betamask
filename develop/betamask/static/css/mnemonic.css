@@ -1,0 +1,64 @@
+/* CSS 변수 */
+:root {
+  --text-color: #868e96;
+}
+
+header {
+  margin-left: 3%;
+  margin-top: 5%;
+}
+
+main {
+  margin-left: 0;
+  margin-top: 0;
+}
+
+.container {
+  display: flex;
+}
+
+/* left */
+.container .left-container {
+  padding: 0 5% 5% 5%;
+  width: 35%;
+}
+
+.container .left-container h1 {
+  font-size: 48px;
+  font-weight: 500;
+}
+
+.mnemonic {
+  width: 75%;
+  /* height: 100px; */
+  border: 2px solid #dee2e6;
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 50px;
+  margin-top: 30px;
+  font-size: 20px;
+  font-weight: 500;
+}
+
+button {
+  /* margin-left: 5%; */
+  width: 90%;
+}
+
+/* right */
+.container .right-container {
+  padding: 0 5% 5% 5%;
+  width: 25%;
+  /* background-color: yellow; */
+  color: var(--text-color);
+  font-weight: 500;
+}
+
+.highlight {
+  color: #1c7ed6;
+}
+
+.highlight:hover {
+  color: rgba(255, 146, 43);
+  cursor: pointer;
+}
