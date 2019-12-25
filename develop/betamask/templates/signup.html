@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>BetaMask</title>
+    <link rel="stylesheet" href="../static/css/common.css" />
+    <link rel="stylesheet" href="../static/css/signup.css" />
+
+    <!-- JQUERY -->
+    <script
+      src="https://code.jquery.com/jquery-3.4.1.min.js"
+      integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+      crossorigin="anonymous"
+    ></script>
+  </head>
+  <body>
+    <header>
+      <img src="../static/images/logo-header.png" alt="로고 헤더 이미지" />
+    </header>
+    <main>
+      <div class="container">
+        <a href="./index.html"> <- Back</a>
+
+        <h1>비밀번호 생성</h1>
+
+        <div class="container-inputs">
+          <div class="container-input">
+            <p>새 비밀번호</p>
+            <div class="input-border">
+              <input placeholder="비밀번호를 입력해주세요" id="password" />
+            </div>
+          </div>
+
+          <div class="container-input">
+            <p>비밀번호 확인</p>
+            <div class="input-border">
+              <input placeholder="비밀번호를 입력해주세요" id="re-password" />
+            </div>
+          </div>
+        </div>
+        <div class="agree-container">
+          <input type="checkbox" id="ex_chk" />
+          <label for="ex_chk">I have read and agree to the</label>
+          <a href="#">Terms of Use</a>
+        </div>
+        <div class="container-button">
+          <!-- <a href="./mnemonic.html"><button id="createButton">생성</button></a> -->
+          <button id="createButton">생성</button>
+        </div>
+      </div>
+    </main>
+    <footer></footer>
+    <script src="../static/js/signup.js"></script>
+  </body>
+</html>
