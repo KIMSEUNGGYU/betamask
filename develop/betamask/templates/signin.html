@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>BetaMask</title>
+    <link rel="stylesheet" href="../static/css/common.css" />
+    <link rel="stylesheet" href="../static/css/signin.css" />
+
+    <!-- JQUERY -->
+    <script
+      src="https://code.jquery.com/jquery-3.4.1.min.js"
+      integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+      crossorigin="anonymous"
+    ></script>
+  </head>
+  <body>
+    <header>
+      <div class="header-group clearfix">
+        <div class="left-header float--left">
+          <img src="../static/images/logo-header.png" alt="로고 헤더 이미지" />
+        </div>
+        <div class="right-header float--right">
+          <div class="network-selector">
+            <select>
+              <option selected> TEST NETWORK</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </header>
+    <main>
+      <div class="top-container">
+        <img src="../static/images/logo.png" alt="로고 이미지" />
+        <span class="title">환영합니다!</span>
+        <span>우리가 기다리던 탈중앙화 웹입니다.</span>
+      </div>
+      <div class="input-container">
+        <input id="password-input" placeholder="비밀번호" />
+      </div>
+      <div class="button-container">
+        <button id="loginButton">로그인</button>
+      </div>
+
+      <div class="bottom-container">
+        <span>계정을 복구하시겠습니까?</span>
+        <span> 계정 시드 구문으로 가져오기</span>
+      </div>
+    </main>
+    <footer></footer>
+    <script src="../static/js/signin.js"></script>
+  </body>
+</html>
