@@ -229,3 +229,4 @@ dmypy.json
 
 ## python flask
 betamask-env
+*.sqlite
