@@ -4,7 +4,7 @@ function createAccount() {
 
   if (password && rePassword) {
     alert('회원가입을 성공했습니다.');
-    window.location = './signin.html';
+    window.location = './mnemonic.html';
   } else {
     alert('비밀번호를 모두 입력해주세요.');
   }
