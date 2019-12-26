@@ -74,7 +74,7 @@ main {
 /* LEFT-CONTAINER */
 .container .left-container {
   background-color: #f8f9fa;
-  width: 25%;
+  width: 40%;
   text-align: center;
 }
 
@@ -109,8 +109,6 @@ main {
   font-weight: bolder;
   padding: 5px;
   font-size: 2px;
-  width: 50%;
-  margin-left: 20%;
 }
 
 .left-container-middle {
@@ -132,9 +130,8 @@ main {
   margin-left: 10px;
 }
 
-.left-container-middle span {
-  display: block;
-  margin-top: 30%;
+.contents-value {
+  margin-top: 5%;
   color: white;
   font-weight: bolder;
   font-size: 20px;

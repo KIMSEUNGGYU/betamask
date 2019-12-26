@@ -25,7 +25,9 @@
     <header>
       <div class="header-group clearfix">
         <div class="left-header float--left">
-          <img src="../static/images/logo-header.png" alt="로고 헤더 이미지" />
+          <a href="/">
+            <img src="../static/images/logo-header.png" alt="로고 헤더 이미지"
+          /></a>
         </div>
         <div class="right-header float--right">
           <div class="network-selector">
@@ -47,7 +49,7 @@
             </div>
             <button>세부 사항</button>
             <div>
-              <label class="account">0xdafdasfs</label>
+              <label class="account">{{ data['address'] }}</label>
             </div>
           </div>
           <div class="left-container-middle">
@@ -55,8 +57,9 @@
               <div>
                 <img src="../static/images/logo.png" alt="로고 이미지" />
               </div>
-              <div>
-                <span>0 ETH</span>
+              <div class="contents-value">
+                {{ data['value'] }} BTC
+                <!-- <span>{{ data['value'] }} BTC</span> -->
               </div>
             </div>
           </div>
