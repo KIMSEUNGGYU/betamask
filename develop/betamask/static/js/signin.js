@@ -1,5 +1,31 @@
 function login() {
-  console.log('로그인 이벤트 발생');
+  // console.log('로그인 이벤트 발생');
+  // console.log('dafds', $('#password-input').val());
+  $.ajax({
+    url: '/signin',
+    contentType: 'application/json',
+    method: 'POST',
+    data: JSON.stringify({
+      password: $('#password-input').val(),
+    }),
+    statusCode: {
+      202: function() {
+        // 로그인 실패
+        alert('로그인 실패, 비밀번호를 확인해주세요');
+      },
+      200: function(result) {
+        // 로그이 성공
+
+        const { data } = result;
+        console.log('data', data);
+        window.location = '/main/' + data;
+      },
+    },
+  }).fail(function(res) {
+    console.log('res', res);
+    alert('서버 오류');
+    // alert('이미 존재하는 계정입니다.');
+  });
 }
 
 const passwordElement = $('#password-input');
