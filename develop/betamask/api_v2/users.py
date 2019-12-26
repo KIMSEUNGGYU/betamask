@@ -22,24 +22,24 @@ def create_user():
         bitcoin_address = get_bitcoin_address(password)
         mnemonic_code = make_mnemonic(bitcoin_address)
 
-        print('비트코인 주소:', bitcoin_address)
-        print('mnemonic_cde:', mnemonic_code)
-
-        print('len', len(bitcoin_address))
-        print('len', len(password))
-        print('len', len(mnemonic_code))
         users = Users()
         users.address = bitcoin_address
         users.password = password
         users.mnemonic = mnemonic_code
 
-        # try:
-        db.session.add(users)
-        db.session.commit()
+        filter_result = Users.query.filter(Users.address == bitcoin_address).first()
 
-        return jsonify( {
-            'address':bitcoin_address,
-        }), 201
+        # 가입이 가능할 경우
+        if filter_result == None:
+            print("DB 에 저장")
+            db.session.add(users)
+            db.session.commit()
+            return jsonify( {
+                'address':bitcoin_address,
+            }), 201
+
+        ## 가입이 불가
+        return jsonify(), 500
 
 # @api.route('/users', methods=['GET', 'POST'])
 # @jwt_required()
