@@ -17,9 +17,9 @@ def get_bitcoin_address(password):
     return bitcoin_address
 
 
-def make_mnemonic(password):
-    bitcoin_address = get_bitcoin_address(password)
-    hash160_value = decode_base58(bitcoin_address)
+def make_mnemonic(address):
+    # bitcoin_address = get_bitcoin_address(address)
+    hash160_value = decode_base58(address)
     mnemonic = Mnemonic("english")
     return mnemonic.to_mnemonic(hash160_value)
 
