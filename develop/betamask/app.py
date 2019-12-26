@@ -1,15 +1,47 @@
 import os
 from flask import Flask
 from flask import render_template
-from flask import request
+from flask import request, jsonify
 from flask_jwt import JWT
 from models import Users, db
 from api_v2 import api as api_v2
-from develop.bitcoin_api.mnemonic import make_mnemonic
+from develop.bitcoin_api.mnemonic import (make_mnemonic, get_bitcoin_address)
+from develop.bitcoin_api.transaction import utxoFetch
+#
+
 app = Flask(__name__)
 
 # app.register_blueprint(api_v1, url_prefix="/api/v1")
 app.register_blueprint(api_v2, url_prefix="/api/v2")
+
+@app.route('/main/<address>', methods=['GET'])
+def main(address):
+    SATOSHI = 100000000
+    print('address', address)
+
+    transactions = utxoFetch(address)
+    total_money = 0
+    for transaction in transactions:
+        total_money += transaction['value']
+
+
+
+    total_money /= SATOSHI
+    print('total_money', total_money)
+
+    # print('transactino', transaction)
+
+    data_object = {
+        'address': address,
+        'value': total_money
+    }
+
+    return render_template('main.html', data=data_object)
+
+
+# @app.route('/main', methods=['GET'])
+# def main():
+#     return render_template('main.html')
 
 @app.route('/mnemonic/<address>', methods=['GET'])
 def user_detail(address):
@@ -27,8 +59,24 @@ def mnemonic():
 def signup():
     return render_template('signup.html')
 
-@app.route('/signin')
+@app.route('/signin', methods=['GET', 'POST'])
 def signin():
+    if request.method == 'POST':
+        data = request.get_json()
+        password = data['password']
+
+        print('password', password)
+        user = Users.query.filter(Users.password == password).first()
+        print('user', user)
+
+        if user == None:
+            return jsonify(), 202         # 값은 수신했지만, 올바른 값 없음
+
+
+        return jsonify({'data': user.serialize['address']}), 200
+
+
+
     return render_template('signin.html')
 
 @app.route('/')
