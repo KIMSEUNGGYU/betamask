@@ -2,11 +2,10 @@ import os
 import sys
 sys.path.append(os.path.abspath("/Users/SG/git/bitcoin"))
 
-
 from flask import jsonify
-from flask import request
+from flask import request, render_template
 # from flask_jwt import jwt_required
-from models2 import Users, db
+from models import Users, db
 from . import api  # __init__ 에 있는 api
 from develop.bitcoin_api.mnemonic import (make_mnemonic, get_bitcoin_address)
 
@@ -21,7 +20,7 @@ def create_user():
         password = data.get('password')
 
         bitcoin_address = get_bitcoin_address(password)
-        mnemonic_code = make_mnemonic(password)
+        mnemonic_code = make_mnemonic(bitcoin_address)
 
         print('비트코인 주소:', bitcoin_address)
         print('mnemonic_cde:', mnemonic_code)
@@ -34,17 +33,12 @@ def create_user():
         users.password = password
         users.mnemonic = mnemonic_code
 
+        # try:
         db.session.add(users)
         db.session.commit()
 
-        # fcuser = Fcuser()
-        #         fcuser.userid = userid
-        #         fcuser.username = username
-        #         fcuser.password = password
-
         return jsonify( {
-            'mnemonic':mnemonic_code,
-            'address': bitcoin_address
+            'address':bitcoin_address,
         }), 201
 
 # @api.route('/users', methods=['GET', 'POST'])
