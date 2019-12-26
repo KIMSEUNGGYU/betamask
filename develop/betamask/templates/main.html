@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>BetaMask</title>
+    <link rel="stylesheet" href="../static/css/common.css" />
+    <link rel="stylesheet" href="../static/css/main.css" />
+
+    <!-- JQUERY -->
+    <script
+      src="https://code.jquery.com/jquery-3.4.1.min.js"
+      integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+      crossorigin="anonymous"
+    ></script>
+
+    <link rel="icon" href="../static/images/logo.png" />
+    <!--
+      <link
+      rel="icon"
+      href="{{ url_for('static', filename = './images/logo.png')}}"
+    />
+    -->
+  </head>
+  <body>
+    <header>
+      <div class="header-group clearfix">
+        <div class="left-header float--left">
+          <img src="../static/images/logo-header.png" alt="로고 헤더 이미지" />
+        </div>
+        <div class="right-header float--right">
+          <div class="network-selector">
+            <select>
+              <option selected> TEST NETWORK</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </header>
+    <main>
+      <div class="header-fake"></div>
+      <div class="container">
+        <div class="left-container">
+          <div class="left-container-top">
+            <img src="../static/images/logo.png" alt="로고 이미지" />
+            <div class="account-text">
+              <label> Account 1</label>
+            </div>
+            <button>세부 사항</button>
+            <div>
+              <label class="account">0xdafdasfs</label>
+            </div>
+          </div>
+          <div class="left-container-middle">
+            <div class="contents">
+              <div>
+                <img src="../static/images/logo.png" alt="로고 이미지" />
+              </div>
+              <div>
+                <span>0 ETH</span>
+              </div>
+            </div>
+          </div>
+          <div class="left-container-bottom">
+            <p>당신의 토큰이 보이지 않나요?</p>
+
+            <p>계정에 토큰을 추가하기 위해서 토큰 추가를 클릭해주세요.</p>
+            <p>토큰 추가</p>
+          </div>
+        </div>
+        <div class="right-container">
+          <div class="inputs">
+            <div class="input">
+              <label>TO: </label>
+              <div class="input-class">
+                <input placeholder="TO" />
+              </div>
+              <label> </label>
+            </div>
+            <div>
+              <div class="input">
+                <label>AMOUNT: </label>
+                <div class="input-class">
+                  <input placeholder="AMOUNT" />
+                </div>
+                <label>BTC</label>
+              </div>
+            </div>
+          </div>
+          <div>
+            <button>전송하기</button>
+          </div>
+        </div>
+      </div>
+      <footer></footer>
+      <script src="../static/js/signin.js"></script>
+    </main>
+  </body>
+</html>
