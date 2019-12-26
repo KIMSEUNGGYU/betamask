@@ -1,37 +1,27 @@
 import os
 from flask import Flask
 from flask import render_template
+from flask import request
 from flask_jwt import JWT
-# from models import Fcuser, db
-from models2 import Users, db
+from models import Users, db
 from api_v2 import api as api_v2
+from develop.bitcoin_api.mnemonic import make_mnemonic
 app = Flask(__name__)
 
 # app.register_blueprint(api_v1, url_prefix="/api/v1")
 app.register_blueprint(api_v2, url_prefix="/api/v2")
 
-## api_betamast
-# @app.route('/first')
-# def first():
-#     return render_template('first-page.html')
-#
-# @app.route('/signup')
-# def signup():
-#     return render_template('signup-page.html')
-#
-# # api
-# @app.route('/register')
-# def register():
-#     return render_template('test/register.html')
-#
-#
-# @app.route('/login')
-# def login():
-#     return render_template('test/login.html')
-#
+@app.route('/mnemonic/<address>', methods=['GET'])
+def user_detail(address):
+    if request.method == 'GET':
+        mnemonic_code = make_mnemonic(address)
+
+        return render_template('mnemonic.html', mnemonic_code=mnemonic_code)
+
 @app.route('/mnemonic')
 def mnemonic():
     return render_template('mnemonic.html')
+
 
 @app.route('/signup')
 def signup():
@@ -49,7 +39,7 @@ def index():
 # config
 
 basedir = os.path.abspath(os.path.dirname(__file__))
-dbfile = os.path.join(basedir, 'db2.sqlite')
+dbfile = os.path.join(basedir, 'db_user.sqlite')
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + dbfile
 app.config['SQLALCHEMY_COMMIT_ON_TEARDOWN'] = True
