@@ -39,10 +39,6 @@ def main(address):
     return render_template('main.html', data=data_object)
 
 
-# @app.route('/main', methods=['GET'])
-# def main():
-#     return render_template('main.html')
-
 @app.route('/mnemonic/<address>', methods=['GET'])
 def user_detail(address):
     if request.method == 'GET':
@@ -54,6 +50,9 @@ def user_detail(address):
 def mnemonic():
     return render_template('mnemonic.html')
 
+@app.route('/update')
+def update():
+    return render_template('update.html')
 
 @app.route('/signup')
 def signup():
@@ -72,10 +71,7 @@ def signin():
         if user == None:
             return jsonify(), 202         # 값은 수신했지만, 올바른 값 없음
 
-
         return jsonify({'data': user.serialize['address']}), 200
-
-
 
     return render_template('signin.html')
 

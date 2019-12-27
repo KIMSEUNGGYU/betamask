@@ -45,3 +45,7 @@ passwordElement.on('change keyup paste', function() {
   $('#loginButton').removeClass('activate');
   $('#loginButton').off('click', login); // 이벤트 해제
 });
+
+$('#get-mnemonic-text').click(function() {
+  window.location = '/update';
+});
