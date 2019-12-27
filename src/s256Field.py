@@ -1,6 +1,6 @@
-import os
-import sys
-sys.path.append(os.path.abspath("/Users/SG/git/bitcoin"))
+# import os
+# import sys
+# sys.path.append(os.path.abspath("/Users/SG/git/bitcoin"))
 
 from src.fieldElement import FieldElement
 from lib.config import (PRIME)

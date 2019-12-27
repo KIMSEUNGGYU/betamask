@@ -1,6 +1,6 @@
-import os
-import sys
-sys.path.append(os.path.abspath("/Users/SG/git/bitcoin"))
+# import os
+# import sys
+# sys.path.append(os.path.abspath("/Users/SG/git/bitcoin"))
 
 from src.point import Point
 from src.s256Field import S256Field

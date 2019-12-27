@@ -1,6 +1,6 @@
-import os
-import sys
-sys.path.append(os.path.abspath("/Users/SG/git/bitcoin"))
+# import os
+# import sys
+# sys.path.append(os.path.abspath("/Users/SG/git/bitcoin"))
 import requests
 from io import BytesIO
 import json

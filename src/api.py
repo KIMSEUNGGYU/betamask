@@ -1,9 +1,17 @@
-import os
-import sys
-sys.path.append(os.path.abspath("/Users/SG/git/bitcoin"))
+# import os
+# path = os.path.split(os.path.abspath(os.path.dirname(__file__)))[0]
+# import sys
+# sys.path.append(os.path.abspath(path))
+
+
+
 import requests
 from io import BytesIO
 from lib.helper import (little_endian_to_int)
+
+
+# print('os.path.abspath(os.path.dirname(__file__)', (os.path.abspath(os.path.dirname(__file__))))
+# print('os.path.abspath(os.path.dirname(__file__)', os.path.relpath(os.path.abspath(os.path.dirname(__file__)), '../'))
 
 class TxFetcher():
     tx_cache = {}
@@ -96,3 +104,5 @@ class TxFetcher():
         # print('UTXO 트랜잭션 가능 갯수:', len(utxo_transaction))
         # print('UTXO 트랜잭션 모음: ',utxo_transaction)
         return utxo_transaction
+
+
