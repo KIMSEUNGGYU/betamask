@@ -71,31 +71,55 @@
           </div>
         </div>
         <div class="right-container">
-          <div class="inputs">
-            <div class="input">
-              <label>TO: </label>
-              <div class="input-class">
-                <input placeholder="TO" />
+          <div class="right-container-header">
+            <div class="side-left">
+              <div>
+                <img src="../static/images/logo.png" alt="로고 이미지" />
               </div>
-              <label> </label>
+              <div class="contents-value">{{ data['value'] }} BTC</div>
             </div>
-            <div>
+            <div class="side-right">
+              <button id="modal-open-button">전송</button>
+            </div>
+          </div>
+          <div class="right-container-contents">
+            <div class="text">
+              <span>히스토리</span>
+            </div>
+          </div>
+          <hr />
+        </div>
+      </div>
+      <footer></footer>
+
+      <div class="modal-wrapper" style="display: none;">
+        <div class="modal">
+          <div class="modal-title">BTC 보내기</div>
+          <div class="modal-container">
+            <div class="inputs">
+              <div class="input">
+                <label>TO: </label>
+                <div class="input-class">
+                  <input placeholder="TO ADDRESS" />
+                </div>
+                <span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+              </div>
+
               <div class="input">
                 <label>AMOUNT: </label>
                 <div class="input-class">
                   <input placeholder="AMOUNT" />
                 </div>
-                <label>BTC</label>
+                <span> BTC </span>
               </div>
             </div>
           </div>
-          <div>
-            <button>전송하기</button>
+          <div class="close-wrapper">
+            <button id="send-button">전송</button>
           </div>
         </div>
       </div>
-      <footer></footer>
-      <script src="../static/js/signin.js"></script>
+      <script src="../static/js/main.js"></script>
     </main>
   </body>
 </html>
