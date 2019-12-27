@@ -110,18 +110,3 @@ button {
   background-color: rgba(52, 152, 219, 1);
   cursor: pointer;
 }
-/* button .activate {
-  background-color: yellow;
-} */
-/* .container .container-button button {
-  background-color: rgba(52, 152, 219, 0.2);
-  background-color: green;
-} */
-
-/* .container .container-button button .activate {
-  background-color: rgba(52, 152, 219, 1);
-  background-color: red;
-} */
-/* .container .container-button button:hover {
-  background-color: rgba(52, 152, 219, 1);
-} */
