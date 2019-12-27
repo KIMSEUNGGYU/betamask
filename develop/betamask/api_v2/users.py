@@ -1,9 +1,16 @@
 import os
+path = os.path.split(os.path.abspath(os.path.dirname(__file__)))[0] # 상위 디렉토리 추출
+path = os.path.split(path)[0]                                       # 상위 디렉토리 추출
+path = os.path.split(path)[0]                                       # 상위 디렉토리 추출
+
 import sys
-sys.path.append(os.path.abspath("/Users/SG/git/bitcoin"))
+# sys.path.append(os.path.abspath("/Users/SG/git/bitcoin"))
+sys.path.append(os.path.abspath(path))
+
+# print('pathsss', path)
 
 from flask import jsonify
-from flask import request, render_template
+from flask import request
 # from flask_jwt import jwt_required
 from models import Users, db
 from . import api  # __init__ 에 있는 api
@@ -12,6 +19,34 @@ from develop.bitcoin_api.mnemonic import (make_mnemonic, get_bitcoin_address)
 @api.route('/test')
 def test():
     return jsonify()
+
+@api.route('/update', methods=['POST'])
+def update():
+    if request.method == 'POST':
+        data = request.get_json()
+        password = data.get('password')
+        mnemonic = data.get('mnemonic')
+
+        query_result = Users.query.filter(Users.mnemonic == mnemonic).first()
+
+        ## 올바르지 않는 경우
+        if query_result == None:
+            return jsonify(), 202       # 값은 수신했지만, 올바른 값 없음
+
+        data = query_result.serialize
+
+        ## 올바른 경우 - 업데이트 진행
+
+        print('data', data)
+
+        data['password'] = password
+
+        print('data', data)
+        Users.query.filter(Users.mnemonic == mnemonic).update(data)
+
+        return jsonify(), 200
+        # print('password', password)
+        # print('mnemonic', mnemonic)
 
 @api.route('/user/create', methods=['POST'])
 def create_user():
