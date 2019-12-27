@@ -1,9 +1,3 @@
-/* common */
-/* body {
-  margin-left: 100px;
-  margin-top: 50px;
-} */
-
 main {
   margin-left: 100px;
   margin-top: 50px;
@@ -36,4 +30,14 @@ button {
 }
 .float--right {
   float: right;
+}
+
+/* 뒤로 가기  */
+.container a {
+  text-decoration: none;
+  font-size: 20px;
+  color: #495057;
+}
+.container a:hover {
+  color: rgba(255, 146, 43, 1);
 }
