@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>BetaMask</title>
+    <link rel="stylesheet" href="../static/css/common.css" />
+    <link rel="stylesheet" href="../static/css/update.css" />
+
+    <!-- JQUERY -->
+    <script
+      src="https://code.jquery.com/jquery-3.4.1.min.js"
+      integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+      crossorigin="anonymous"
+    ></script>
+    <link
+      rel="icon"
+      href="{{ url_for('static', filename = './images/logo.png')}}"
+    />
+  </head>
+  <body>
+    <header>
+      <a href="/">
+        <img
+          src="{{ url_for('static', filename = './images/logo-header.png')}}"
+          alt="로고 헤더 이미지"
+        />
+      </a>
+    </header>
+    <main>
+      <div class="container">
+        <a href="./index.html"> <- Back</a>
+        <div class="container-title">
+          <h1>시드 구문으로 계정 복구하기</h1>
+          <span>
+            12개 단어로 구성된 비밀 구문을 입력하여 저장소를 복구하세요.
+          </span>
+        </div>
+
+        <div class="input-seed">
+          <span>Wallet Seed </span>
+          <div class="textarea-container">
+            <textarea
+              placeholder="각 단어는 공백 한칸으로 분리합니다"
+              id="mnemonic-input"
+            ></textarea>
+          </div>
+        </div>
+
+        <div class="container-inputs">
+          <div class="container-input">
+            <p>새 비밀번호</p>
+            <div class="input-border">
+              <input placeholder="비밀번호를 입력해주세요" id="password" />
+            </div>
+          </div>
+
+          <div class="container-input">
+            <p>비밀번호 확인</p>
+            <div class="input-border">
+              <input placeholder="비밀번호를 입력해주세요" id="re-password" />
+            </div>
+          </div>
+        </div>
+        <div class="container-button">
+          <button id="update-button">복구</button>
+        </div>
+      </div>
+    </main>
+    <footer></footer>
+    <script src="../static/js/update.js"></script>
+  </body>
+</html>
