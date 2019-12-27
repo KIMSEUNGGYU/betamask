@@ -6,7 +6,7 @@ from flask_jwt import JWT
 from models import Users, db
 from api_v2 import api as api_v2
 from develop.bitcoin_api.mnemonic import (make_mnemonic, get_bitcoin_address)
-from develop.bitcoin_api.transaction import utxoFetch
+from develop.bitcoin_api.transaction import get_total_money
 #
 
 app = Flask(__name__)
@@ -16,20 +16,8 @@ app.register_blueprint(api_v2, url_prefix="/api/v2")
 
 @app.route('/main/<address>', methods=['GET'])
 def main(address):
-    SATOSHI = 100000000
-    print('address', address)
-
-    transactions = utxoFetch(address)
-    total_money = 0
-    for transaction in transactions:
-        total_money += transaction['value']
-
-
-
-    total_money /= SATOSHI
+    total_money = get_total_money(address)
     print('total_money', total_money)
-
-    # print('transactino', transaction)
 
     data_object = {
         'address': address,
