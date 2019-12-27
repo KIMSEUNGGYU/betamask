@@ -69,7 +69,14 @@ class TxFetcher():
         print('response', response)
         if response.status_code == 200:
             print("정상적 수행")
+
             datas = response.json()
+
+            # print('data', datas)
+
+            if datas['balance'] == 0:
+                return []
+
             txrefs = datas['txrefs']
 
             # 트랜잭션 중에서 UTXO 가능한 것들 추출
