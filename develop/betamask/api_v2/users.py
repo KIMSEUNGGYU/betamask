@@ -6,37 +6,29 @@ path = os.path.split(path)[0]                                       # 상위 디
 import sys
 sys.path.append(os.path.abspath(path))
 
-# import os
-# import sys
-# sys.path.append(os.path.abspath("/Users/SG/git/bitcoin"))
-
-
+import blockcypher
 
 from flask import jsonify
 from flask import request
-# from flask_jwt import jwt_required
 from models import Users, db
 from tx_models import Tx_history, db2
+
 from . import api  # __init__ 에 있는 api
 from develop.bitcoin_api.mnemonic import (make_mnemonic, get_bitcoin_address)
-# from develop.bitcoin_api.transaction import (get_total_money)
 
 from lib.helper import (run, little_endian_to_int, hash256, decode_base58, SIGNATURE_HASH_ALL)
 from src.transaction import Transaction
 from src.transactionIn import TransactionIn
 from src.transactionOut import TransactionOut
 from src.script import (Script, p2pkh_script)
-# from src.s256Point import S256Point
-# from src.signature import Signature
-# from src.privatekey import PrivateKey
-# from src.transactionFetcher import TxFetcher
-# from src.api import TxFetcher
 from lib.config import FETCH_HEADERS_OPTION
 
 from src.privatekey import PrivateKey
 from lib.helper import (hash256, little_endian_to_int)
 import requests
 SATOSHI = 100000000
+
+
 
 def get_secret(from_address):
     query_result = Users.query.filter(Users.address == from_address).first()
@@ -135,33 +127,52 @@ def send():
 
 
         # http://ingyu.kr:18334/tx/feebcbfd539873538bdb70b971ed3993c1030041f8ae2cc272154243de0a7774
-        print('tx_obj serialize', tx_obj.serialize().hex())
+        # print('tx_obj serialize', tx_obj.serialize().hex())
+        #
+        # print('ffff', blockcypher.get_total_balance('mtSYsqiRFrfaTAN7y1EvBb3CBEadEF1a9R', coin_symbol="btc-testnet"))
 
-
-        ## 트랜잭션 보내기
-        url = 'https://sochain.com/api/v2/send_tx/BTCTEST'
-        data = {
-            'tx_hex' : tx_obj.serialize().hex()
-        }
-
+        ## 트랜잭션 보내기 - blockcypher
         try:
-            response = requests.post(url, data=data, headers=FETCH_HEADERS_OPTION)
-            message = response.json()
-            print('message', message)
-            txid = message['data']['txid']
+            transaction = blockcypher.pushtx(tx_hex=tx_obj.serialize().hex(), api_key="2ab5a455118a405290482d6232d4f051", coin_symbol="btc-testnet")
+            transaction_hash = transaction['tx']['hash']
+            # print('hex:', transaction_hash)
 
             tx_history = Tx_history()
             tx_history.address = from_address
-            tx_history.tx = txid
+            tx_history.tx = transaction_hash
 
             db2.session.add(tx_history)
             db2.session.commit()
 
-
-
-            return jsonify({'message':txid}), 200
+            return jsonify({'message':transaction_hash}), 200
         except:
             return jsonify({'message': "트랜잭션 전송 오류"}), 202
+
+
+        ## 트랜잭션 보내기 - sochain
+        # url = 'https://sochain.com/api/v2/send_tx/BTCTEST'
+        # data = {
+        #     'tx_hex' : tx_obj.serialize().hex()
+        # }
+
+        # try:
+        #     response = requests.post(url, data=data, headers=FETCH_HEADERS_OPTION)
+        #     message = response.json()
+        #     print('message', message)
+        #     txid = message['data']['txid']
+        #
+        #     tx_history = Tx_history()
+        #     tx_history.address = from_address
+        #     tx_history.tx = txid
+        #
+        #     db2.session.add(tx_history)
+        #     db2.session.commit()
+        #
+        #
+        #
+        #     return jsonify({'message':txid}), 200
+        # except:
+        #     return jsonify({'message': "트랜잭션 전송 오류"}), 202
 
 
 @api.route('/update', methods=['POST'])
