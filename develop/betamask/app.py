@@ -2,26 +2,48 @@ import os
 from flask import Flask
 from flask import render_template
 from flask import request, jsonify
-from flask_jwt import JWT
+from sqlalchemy import desc
 from models import Users, db
+from tx_models import Tx_history, db2
 from api_v2 import api as api_v2
-from develop.bitcoin_api.mnemonic import (make_mnemonic, get_bitcoin_address)
+from develop.bitcoin_api.mnemonic import make_mnemonic
 from develop.bitcoin_api.transaction import get_total_money
-#
 
 app = Flask(__name__)
 
-# app.register_blueprint(api_v1, url_prefix="/api/v1")
+SATOSHI = 100000000
 app.register_blueprint(api_v2, url_prefix="/api/v2")
 
 @app.route('/main/<address>', methods=['GET'])
 def main(address):
     total_money = get_total_money(address)
-    print('total_money', total_money)
+    total_money /= SATOSHI
+
+
+    # tx_history = Tx_history()
+
+    ## sql 내림차순
+    history = Tx_history.query.filter(Tx_history.address == address).order_by(desc(Tx_history.id)).all()
+    # print('history', history.serialize)
+
+    print(len(history))
+    # user = Users.query.filter(Users.fake_password == password).first()
+
+    history_length = len(history)
+    if history_length > 5:
+        history_length = 5
+
+    result = []
+    for i in range(history_length):
+        result.append(history[i].serialize['tx'])
+
+    # print('result', result)
 
     data_object = {
         'address': address,
-        'value': total_money
+        'value': total_money,
+        'historys': result
+
     }
 
     return render_template('main.html', data=data_object)
@@ -31,7 +53,6 @@ def main(address):
 def user_detail(address):
     if request.method == 'GET':
         mnemonic_code = make_mnemonic(address)
-
         return render_template('mnemonic.html', mnemonic_code=mnemonic_code)
 
 @app.route('/mnemonic')
@@ -53,7 +74,7 @@ def signin():
         password = data['password']
 
         print('password', password)
-        user = Users.query.filter(Users.password == password).first()
+        user = Users.query.filter(Users.fake_password == password).first()
         print('user', user)
 
         if user == None:
@@ -72,8 +93,13 @@ def index():
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 dbfile = os.path.join(basedir, 'db_user.sqlite')
+dbfile2 = os.path.join(basedir, 'txs.sqlite')
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + dbfile
+app.config['SQLALCHEMY_BINDS'] = {
+    'test2': 'sqlite:///' + dbfile,
+    'test1': 'sqlite:///' + dbfile2
+}
 app.config['SQLALCHEMY_COMMIT_ON_TEARDOWN'] = True
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = 'gyu12345'
@@ -82,23 +108,10 @@ db.init_app(app)
 db.app = app
 db.create_all()
 
+db2.init_app(app)
+db2.app = app
+db2.create_all()
 
-# def authenticate(username, password):
-#     # 인증하는 부분을 함수로 만들어야함. JWT 는
-#     # 플라크스에서 JWT 는 userid 가 아닌 username 을 사용하게 되어 있음
-#     user = Fcuser.query.filter(Fcuser.userid == username).first()
-#
-#     if user.password == password:
-#         return user
-#
-#
-# def identity(payload):
-#     # 복호화 과정? JWT
-#     userid = payload['identity']
-#     return Fcuser.query.filter(Fcuser.id == userid).first()
-
-
-# jwt = JWT(app, authenticate, identity)
 
 if __name__ == "__main__":
     app.run(host='127.0.0.1', port=5000, debug=True)
