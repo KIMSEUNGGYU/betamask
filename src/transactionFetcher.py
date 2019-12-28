@@ -30,12 +30,6 @@ class TxFetcher:
             print('url', url)
 
             ## 프로그램 설정 데이터
-            FETCH_HEADERS_OPTION = {
-                'Host': 'sochain.com',
-                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36',
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9;*',
-                'Cookie': 'cf_clearance=04d471ba1c07724e4a2dac4f25fada48baecc4b6-1577100896-0-150;'
-            }
             response = requests.get(url, headers=FETCH_HEADERS_OPTION)
             if response.status_code == 200:
                 transactions = []
