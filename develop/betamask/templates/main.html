@@ -49,7 +49,9 @@
             </div>
             <button>세부 사항</button>
             <div>
-              <label class="account">{{ data['address'] }}</label>
+              <label class="account" id="account-address">
+                {{ data['address'] }}
+              </label>
             </div>
           </div>
           <div class="left-container-middle">
@@ -88,10 +90,14 @@
             </div>
           </div>
           <hr />
+          {% for history in data['historys']%}
+          <li>{{ history }}</li>
+          {% endfor %}
         </div>
       </div>
       <footer></footer>
 
+      <!-- MODAL -->
       <div class="modal-wrapper" style="display: none;">
         <div class="modal">
           <div class="modal-title">BTC 보내기</div>
@@ -100,7 +106,11 @@
               <div class="input">
                 <label>TO: </label>
                 <div class="input-class">
-                  <input placeholder="TO ADDRESS" />
+                  <input
+                    placeholder="TO ADDRESS"
+                    id="input-address"
+                    value="mq4zcoFEimt2vmYutHZ3jC9gLE9sehejRx"
+                  />
                 </div>
                 <span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
               </div>
@@ -108,7 +118,13 @@
               <div class="input">
                 <label>AMOUNT: </label>
                 <div class="input-class">
-                  <input placeholder="AMOUNT" />
+                  <input
+                    type="number"
+                    step="0.0000001"
+                    placeholder="AMOUNT"
+                    id="input-amount"
+                    value="0.001"
+                  />
                 </div>
                 <span> BTC </span>
               </div>
@@ -116,9 +132,20 @@
           </div>
           <div class="close-wrapper">
             <button id="send-button">전송</button>
+            <button id="close-button">닫기</button>
           </div>
         </div>
       </div>
+      <!-- LOADING -->
+
+      <div class="loader-wrapper" style="display: none;">
+        <div class="loader"></div>
+      </div>
+
+      <!-- <div class="container" style="display:none;">
+        <h1>로딩 후 화면</h1>
+        <div></div>
+      </div> -->
       <script src="../static/js/main.js"></script>
     </main>
   </body>
