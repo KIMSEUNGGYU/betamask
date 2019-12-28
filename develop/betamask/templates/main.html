@@ -59,10 +59,7 @@
               <div>
                 <img src="../static/images/logo.png" alt="로고 이미지" />
               </div>
-              <div class="contents-value">
-                {{ data['value'] }} BTC
-                <!-- <span>{{ data['value'] }} BTC</span> -->
-              </div>
+              <div class="contents-value">{{ data['value'] }} BTC</div>
             </div>
           </div>
           <div class="left-container-bottom">
@@ -90,9 +87,13 @@
             </div>
           </div>
           <hr />
-          {% for history in data['historys']%}
-          <li>{{ history }}</li>
-          {% endfor %}
+          <div class="contents-history">
+            <ul>
+              {% for history in data['historys']%}
+              <li>{{ history }}</li>
+              {% endfor %}
+            </ul>
+          </div>
         </div>
       </div>
       <footer></footer>
@@ -141,11 +142,6 @@
       <div class="loader-wrapper" style="display: none;">
         <div class="loader"></div>
       </div>
-
-      <!-- <div class="container" style="display:none;">
-        <h1>로딩 후 화면</h1>
-        <div></div>
-      </div> -->
       <script src="../static/js/main.js"></script>
     </main>
   </body>

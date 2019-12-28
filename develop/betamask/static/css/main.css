@@ -183,6 +183,30 @@ main {
   padding: 15px;
 }
 
+.contents-history {
+  /* background-color: red; */
+  padding: 20px;
+  color: #343a40
+}
+
+ul {
+ padding: 0;
+ margin: 0;
+}
+
+li {
+  list-style: none;
+  padding: 4px;
+  /* padding-left: 0px; */
+  
+}
+
+/* }
+.contents-history li {
+  /* background-color: red; */
+  /* padding: 5px; */
+} */
+
 .side-left {
   display: flex;
   justify-content: flex-start;
@@ -199,7 +223,6 @@ main {
 .side-right {
   justify-content: flex-end;
   display: flex;
-  align-items: center;
 }
 .side-right button {
   width: 100px;
@@ -207,7 +230,7 @@ main {
   background-color: #fff;
   color: #4dabf7;
   border: 2px solid #4dabf7;
-  margin-top: 12px;
+  /* margin-top: 12px; */
   margin-right: 20px;
 }
 
