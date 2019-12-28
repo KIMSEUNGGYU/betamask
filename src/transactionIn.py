@@ -1,9 +1,9 @@
 from lib.helper import (little_endian_to_int, int_to_little_endian)
 from src.script import Script
 # from src.api import (tx_fetch, utxo_fetcher)
-from src.transactionFetcher import TxFetcher
+# from src.transactionFetcher import TxFetcher
 # from src.api import TxFetcher
-
+from src.fetcher import Fetcher
 
 class TransactionIn:
     def __init__(self, previous_transaction, previous_index, script_signature=None, sequence=0xffffffff):
@@ -56,7 +56,8 @@ class TransactionIn:
         :param testnet:
         :return:
         """
-        return TxFetcher.fetch(self.previous_transaction.hex(), testnet=testnet)
+        # return TxFetcher.fetch(self.previous_transaction.hex(), testnet=testnet)
+        return Fetcher.fetch(self.previous_transaction.hex(), testnet=testnet)
         # return TxFetcher.fetch(self.previous_transaction.hex())
 
 
