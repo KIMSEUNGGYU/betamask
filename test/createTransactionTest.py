@@ -1,6 +1,8 @@
 import os
 import sys
-sys.path.append(os.path.abspath("/Users/SG/git/bitcoin"))
+path = os.path.split(os.path.abspath(os.path.dirname(__file__)))[0] # 상위 디렉토리 추출
+sys.path.append(os.path.abspath(path))
+
 import requests
 from io import BytesIO
 

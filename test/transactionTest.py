@@ -1,6 +1,8 @@
 import os
 import sys
-sys.path.append(os.path.abspath("/Users/SG/git/bitcoin"))
+path = os.path.split(os.path.abspath(os.path.dirname(__file__)))[0] # 상위 디렉토리 추출
+sys.path.append(os.path.abspath(path))
+
 import requests
 from unittest import TestCase
 from io import BytesIO
@@ -14,8 +16,10 @@ from src.s256Point import S256Point
 from src.signature import Signature
 from src.privatekey import PrivateKey
 
+
+from src.fetcher import Fetcher
 # from src.transactionFetcher import TxFetcher
-from src.transactionFetcher import TxFetcher2
+# from src.transactionFetcher import TxFetcher2
 
 
 class TransactionTest(TestCase):
@@ -111,13 +115,13 @@ class TransactionTest(TestCase):
     # 추가해야함 테스트 코드
     def test_sig_hash(self):
         print("********** [트랜잭션 서명 해시 구하는 방법?] **********")
-        tx = TxFetcher.fetch('452c629d67e41baec3ac6f04fe744b4b9617f8f859c63b3002f8684e7a4fee03')
+        tx = Fetcher.fetch('452c629d67e41baec3ac6f04fe744b4b9617f8f859c63b3002f8684e7a4fee03')
         # want = int('27e0c5994dec7824e56dec6b2fcb342eb7cdb0d0957c2fce9882f715e85d81a6', 16)
         # self.assertEqual(tx.signature_hash(0), want)
 
     def test_sig_hash2(self):
         print("********** [트랜잭션 서명 해시 구하는 방법 22222] **********")
-        tx = TxFetcher2.fetch('452c629d67e41baec3ac6f04fe744b4b9617f8f859c63b3002f8684e7a4fee03', testnet=False)
+        tx = Fetcher.fetch('452c629d67e41baec3ac6f04fe744b4b9617f8f859c63b3002f8684e7a4fee03', testnet=False)
         want = int('27e0c5994dec7824e56dec6b2fcb342eb7cdb0d0957c2fce9882f715e85d81a6', 16)
         self.assertEqual(tx.signature_hash(0), want)
 
@@ -125,7 +129,7 @@ class TransactionTest(TestCase):
     def test_verify_p2pkh(self):
         """ 테스트넷은 에러가 남 """
         print("********** [트랜잭션 p2pkh 서명 검증?] **********")
-        tx = TxFetcher.fetch('452c629d67e41baec3ac6f04fe744b4b9617f8f859c63b3002f8684e7a4fee03')
+        tx = Fetcher.fetch('452c629d67e41baec3ac6f04fe744b4b9617f8f859c63b3002f8684e7a4fee03')
         self.assertTrue(tx.verify())
         # tx = TxFetcher.fetch('5418099cc755cb9dd3ebc6cf1a7888ad53a1a3beb5a025bce89eb1bf7f1650a2', testnet=True)
         # self.assertTrue(tx.verify())
@@ -133,17 +137,17 @@ class TransactionTest(TestCase):
     def test_verify_p2pkh2(self):
         """ 테스트넷은 에러가 남 """
         print("********** [트랜잭션 p2pkh 서명 검증? 2222] **********")
-        tx = TxFetcher2.fetch('452c629d67e41baec3ac6f04fe744b4b9617f8f859c63b3002f8684e7a4fee03')
+        tx = Fetcher.fetch('452c629d67e41baec3ac6f04fe744b4b9617f8f859c63b3002f8684e7a4fee03')
         self.assertTrue(tx.verify())
 
 
     def test_verify_p2sh(self):
-        tx = TxFetcher.fetch('46df1a9484d0a81d03ce0ee543ab6e1a23ed06175c104a178268fad381216c2b')
+        tx = Fetcher.fetch('46df1a9484d0a81d03ce0ee543ab6e1a23ed06175c104a178268fad381216c2b')
         self.assertTrue(tx.verify())
 
     def test_verify_p2sh2(self):
         print("********** [ 2222 ] **********")
-        tx = TxFetcher2.fetch('46df1a9484d0a81d03ce0ee543ab6e1a23ed06175c104a178268fad381216c2b')
+        tx = Fetcher.fetch('46df1a9484d0a81d03ce0ee543ab6e1a23ed06175c104a178268fad381216c2b')
         self.assertTrue(tx.verify())
 
     def test_sign_input(self):      # 잘안됨
