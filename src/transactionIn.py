@@ -1,8 +1,5 @@
 from lib.helper import (little_endian_to_int, int_to_little_endian)
 from src.script import Script
-# from src.api import (tx_fetch, utxo_fetcher)
-# from src.transactionFetcher import TxFetcher
-# from src.api import TxFetcher
 from src.fetcher import Fetcher
 
 class TransactionIn:
